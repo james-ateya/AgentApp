@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:summary="Set Printer mac address"
+        android:title="Printer Mac Address" >
+        <EditTextPreference
+            android:defaultValue="00:02:5B:B3:8A:BF"
+            android:key="printermac"
+            android:summary="Enter the mac address manually"
+            android:title="Enter Printer MacAddress" />
+
+        <com.paltouch.agentapp.ScanPrinter
+            android:name="Set Default Directory"
+            android:key="printermac"
+            android:summary="Scan mac address of printer"
+            android:title="Scan Printer MacAddress" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:summary="Set Receipt Details"
+        android:title="Receipt Details" >
+        <EditTextPreference
+            android:defaultValue="DEMO COMPANY"
+            android:key="printcompany"
+            android:summary="Enter company&apos;s name"
+            android:title="Set company name" />
+        <EditTextPreference
+            android:defaultValue="P.O BOX"
+            android:key="printbox"
+            android:summary="Enter company&apos;s P.O box"
+            android:title="Set company P.O box" />
+        <EditTextPreference
+            android:defaultValue="07........"
+            android:key="printtel"
+            android:summary="Enter company&apos;s telephone"
+            android:title="Set company&apos;s telephone" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

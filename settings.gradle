@@ -1,0 +1,4 @@
+rootProject.name = "AgentApp"
+include ':app'
+include ':library'
+include ':library4'

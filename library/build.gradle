@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 29
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    //compile project(':titaniclibrary')
+    //compile 'com.pnikosis:materialish-progress:1.0'
+    implementation project(':library4')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.legacy:legacy-support-v13:1.0.0'
+
+}
+
+//apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'

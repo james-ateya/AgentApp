@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AgentApp</string>
+
+    <string-array name="Accounts_to_select">
+        <item>Deposits</item>
+        <item>House Rent</item>
+        <item>Loan</item>
+    </string-array>
+</resources>

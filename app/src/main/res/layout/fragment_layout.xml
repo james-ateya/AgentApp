@@ -1,0 +1,55 @@
+<com.dashboard.DashboardLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#f8f9fe">
+
+    <!--  Collections Button -->
+    <Button
+        android:id="@+id/btn_deposit"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btndeposit"
+        android:textColor="@color/black"
+        android:text="DEPOSIT" />
+
+    <!--  Withdraw Button -->
+    <Button
+        android:id="@+id/btn_withdraw"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btnwithdraw"
+        android:textColor="@color/black"
+        android:text="WITHDRAW" />
+
+    <!--  Settings Button -->
+    <Button
+        android:id="@+id/btn_settings"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btnsettings"
+        android:textColor="@color/black"
+        android:text="SETTINGS" />
+
+    <!--  Reports Button -->
+    <Button
+        android:id="@+id/btn_reports"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btnreports"
+        android:textColor="@color/black"
+        android:text="REPORTS" />
+
+    <!--  Info Button -->
+    <Button
+        android:id="@+id/btn_info"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btninfo"
+        android:textColor="@color/black"
+        android:text="INFO" />
+
+    <!--  Help Button -->
+    <Button
+        android:id="@+id/btn_help"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btnhelp"
+        android:textColor="@color/black"
+        android:text="HELP" />
+
+</com.dashboard.DashboardLayout>

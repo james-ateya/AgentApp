@@ -150,6 +150,12 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         boolean isChecked = switchbtn.isChecked();
     }
 
+    public void Backbutton_click(View v){
+        Intent i = new Intent(CustomerDeposits.this, MainActivity.class);
+        startActivity(i);
+        CustomerDeposits.this.finish();
+    }
+
     public void applyStyle(CharSequence switchTxtOn, CharSequence switchTxtOff,
                            String type) {
         if (type.equals("printer")) {

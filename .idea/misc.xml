@@ -8,9 +8,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android projects/AgentApp/app/src/main/res/drawable/btn_bg_design.xml" value="0.10520833333333333" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/drawable/customtrack.xml" value="0.11354166666666667" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/drawable/switch_selector.xml" value="0.11354166666666667" />
-        <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_customer_deposits.xml" value="0.18" />
+        <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_customer_deposits.xml" value="0.1" />
+        <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_login.xml" value="0.1" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_main.xml" value="0.10005065856129686" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/footer_layout.xml" value="0.10005065856129686" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/fragment_layout.xml" value="0.1" />

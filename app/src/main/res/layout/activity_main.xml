@@ -6,7 +6,6 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     tools:context="com.paltouch.agentapp.MainActivity">
-
     <!-- Include Footer -->
     <include layout="@layout/footer_layout" />
 

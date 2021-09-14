@@ -6,13 +6,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".CustomerDeposits"
-    android:background="#f8f9fe">
+    android:background="@drawable/app_bg_include_top">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="8dp"
+        android:onClick="Backbutton_click"
+        android:src="@drawable/btn_back"></ImageView>
 
     <RelativeLayout
         android:id="@+id/relativebottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="70dp">
 
         <Switch
             android:id="@+id/printerswitch"
@@ -55,6 +64,7 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:background="@drawable/btn_bg_design"
             android:text="Search"
             android:textColor="@color/black"></Button>
 
@@ -99,40 +109,42 @@
         android:id="@+id/edadditems"
         android:layout_width="fill_parent"
         android:layout_height="150dp"
+        android:layout_marginTop="10dp"
         android:layout_below="@+id/linearLayoutCompat2"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:background="@android:drawable/editbox_background"
         android:textColor="@color/black"
         android:textSize="12dp"
+        android:inputType="none"
         android:textStyle="bold"></EditText>
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_below="@id/edadditems"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_below="@id/edadditems">
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnsavedetails"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
+            android:background="@drawable/btn_bg_design"
             android:text="SAVE"
+            android:textAlignment="center"
+            android:textColor="@color/black"
             android:textSize="20dp"></Button>
 
         <Button
             android:id="@+id/btnprintreceipt"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_gravity="center"
             android:layout_marginLeft="60dp"
-            android:layout_marginTop="10dp"
+            android:background="@drawable/btn_bg_design"
             android:text="Print"
+            android:textAlignment="center"
+            android:textColor="@color/black"
             android:textSize="20dp"></Button>
     </LinearLayout>
 

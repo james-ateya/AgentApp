@@ -8,10 +8,34 @@
     tools:context=".CustomerDeposits"
     android:background="#f8f9fe">
 
+    <RelativeLayout
+        android:id="@+id/relativebottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+        <Switch
+            android:id="@+id/printerswitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:onClick="togglestatehandler"
+            android:switchPadding="20dp"
+            android:text="Printer"
+            android:textColor="@color/black"
+            android:textOff="Off"
+            android:textOn="On"
+            android:textSize="18dp"
+            android:thumb="@drawable/switch_selector"
+            android:thumbTextPadding="10dp"
+            android:track="@drawable/customtrack" />
+    </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/linearLayoutCompat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/relativebottom"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
@@ -71,6 +95,18 @@
 
     </LinearLayout>
 
+    <EditText
+        android:id="@+id/edadditems"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_below="@+id/linearLayoutCompat2"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@android:drawable/editbox_background"
+        android:textColor="@color/black"
+        android:textSize="12dp"
+        android:textStyle="bold"></EditText>
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -78,7 +114,7 @@
         android:layout_margin="10dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_below="@id/linearLayoutCompat2">
+        android:layout_below="@id/edadditems">
 
         <Button
             android:id="@+id/btnsavedetails"
@@ -99,28 +135,5 @@
             android:text="Print"
             android:textSize="20dp"></Button>
     </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/relativebottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-
-        <Switch
-            android:id="@+id/printerswitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:onClick="togglestatehandler"
-            android:switchPadding="20dp"
-            android:text="Printer"
-            android:textColor="@color/black"
-            android:textOff="Off"
-            android:textOn="On"
-            android:textSize="18dp"
-            android:thumb="@drawable/switch_selector"
-            android:thumbTextPadding="10dp"
-            android:track="@drawable/customtrack" />
-    </RelativeLayout>
 
 </RelativeLayout>

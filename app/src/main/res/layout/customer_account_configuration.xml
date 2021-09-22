@@ -15,6 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_marginTop="8dp"
+            android:onClick="CustAccBackbutton_click"
             android:src="@drawable/btn_back">
         </ImageView>
 

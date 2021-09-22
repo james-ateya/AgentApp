@@ -59,4 +59,8 @@ public class Customer_account_configuration extends Activity {
         startActivity(i);
         Customer_account_configuration.this.finish();
     }
+    public void CustAccBackbutton_click(View v){
+        Intent i = new Intent(Customer_account_configuration.this, Customer_Registration.class);
+        startActivity(i);
+    }
 }

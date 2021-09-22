@@ -1,17 +1,17 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:drawable="@drawable/help_pop"
+        android:drawable="@drawable/imgtransfer_pop"
         android:state_focused="true"
         android:state_pressed="true" />
     <item
-        android:drawable="@drawable/help_pop"
+        android:drawable="@drawable/imgtransfer_pop"
         android:state_focused="false"
         android:state_pressed="true" />
     <item
-        android:drawable="@drawable/btn_help"
+        android:drawable="@drawable/btn_imgtransfers"
         android:state_focused="true" />
     <item
-        android:drawable="@drawable/btn_help"
+        android:drawable="@drawable/btn_imgtransfers"
         android:state_focused="false"
         android:state_pressed="false" />
 </selector>

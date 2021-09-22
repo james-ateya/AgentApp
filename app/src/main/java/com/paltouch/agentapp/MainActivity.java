@@ -9,7 +9,7 @@ import android.widget.Button;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class MainActivity extends Activity {
-    Button btn_deposit,btn_withdraw,btn_settings,btn_reports,btn_info,btn_help;
+    Button btn_deposit,btn_withdraw,btn_settings,btn_reports,btn_info,btn_customer;
 
 
     @Override
@@ -34,6 +34,16 @@ public class MainActivity extends Activity {
                     startActivity(isettings);
                     MainActivity.this.finish();
                 }
+        });
+
+        btn_customer = (Button) findViewById(R.id.btn_customer);
+        btn_customer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent iscustomer_reg = new Intent(MainActivity.this, Customer_Registration.class);
+                startActivity(iscustomer_reg);
+                MainActivity.this.finish();
+            }
         });
 
     }

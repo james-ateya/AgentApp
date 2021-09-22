@@ -12,13 +12,21 @@
         android:textColor="@color/black"
         android:text="DEPOSIT" />
 
+    <!--  Help Button -->
+    <Button
+        android:id="@+id/btn_customer"
+        style="@style/DashboardButton"
+        android:drawableTop="@drawable/btnhelp"
+        android:textColor="@color/black"
+        android:text="CUSTOMER REG." />
+
     <!--  Withdraw Button -->
     <Button
         android:id="@+id/btn_withdraw"
         style="@style/DashboardButton"
         android:drawableTop="@drawable/btnwithdraw"
         android:textColor="@color/black"
-        android:text="WITHDRAW" />
+        android:text="TRANSFER" />
 
     <!--  Settings Button -->
     <Button
@@ -44,12 +52,5 @@
         android:textColor="@color/black"
         android:text="INFO" />
 
-    <!--  Help Button -->
-    <Button
-        android:id="@+id/btn_help"
-        style="@style/DashboardButton"
-        android:drawableTop="@drawable/btnhelp"
-        android:textColor="@color/black"
-        android:text="HELP" />
 
 </com.dashboard.DashboardLayout>

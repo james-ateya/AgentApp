@@ -38,8 +38,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
@@ -71,14 +73,19 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     byte FONT_TYPE;
     //SharedPreferences sharedPref;
 
-    Button btnprintreceipt,btnsavedetails,btn_generate;
-    EditText edt_amount,edt_searchclient;
+    Boolean useprinter;
+    Button btnprintreceipt,btnsavedetails,btn_generate,btncompletetransaction;
+    EditText edt_amount,edt_searchclient,edadditems;
     TextView txt_clientname;
     Spinner spn_accounts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_deposits);
+
+        SharedPreferences spref6 = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        useprinter = spref6.getBoolean("useprinter", true);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
@@ -99,6 +106,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
 
         edt_amount = (EditText) findViewById(R.id.edt_amount);
         edt_searchclient = (EditText) findViewById(R.id.edt_searchclient);
+        edadditems = (EditText) findViewById(R.id.edadditems);
         btn_generate = (Button) findViewById(R.id.btn_generate);
         btn_generate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +135,33 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         btnsavedetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //upload details to the server
 
+            }
+        });
+
+        btncompletetransaction = (Button) findViewById(R.id.btncompletetransaction);
+        btncompletetransaction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Save batch transactions
+                List<String> Account_name = new ArrayList<String>();
+                Account_name.add("RENT");
+                Account_name.add("NHIF");
+                Account_name.add("SCHOOL FEES");
+
+                List<String> Amount = new ArrayList<String>();
+                Amount.add("1");
+                Amount.add("2");
+                Amount.add("3");
+
+                StringBuffer sbitems = new StringBuffer();
+                for(int i = 0;i<Account_name.size();i++ ) {
+                    sbitems.append(Account_name.get(i) + ": " + Amount.get(i) + "\n");
+                }
+                edadditems.setText("");
+                edadditems.setText("");
+                edadditems.setText(sbitems.toString());
             }
         });
 
@@ -136,7 +170,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             @Override
             public void onClick(View v) {
                 if (printerswitch.isChecked()){
-                    //Print Details
+                    //Print receipt to the client
                     printdetails();
                 }else {
                     new SweetAlertDialog(CustomerDeposits.this,
@@ -155,6 +189,18 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         Intent i = new Intent(CustomerDeposits.this, MainActivity.class);
         startActivity(i);
         CustomerDeposits.this.finish();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(useprinter){
+            printerswitch.setVisibility(View.VISIBLE);
+            btnprintreceipt.setVisibility(View.VISIBLE);
+        }else {
+            printerswitch.setVisibility(View.GONE);
+            btnprintreceipt.setVisibility(View.GONE);
+        }
     }
 
     public void togglestatehandler(View v) {

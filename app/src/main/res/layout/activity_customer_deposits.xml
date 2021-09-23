@@ -48,11 +48,8 @@
         android:id="@+id/linearLayoutCompat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/relativebottom"
-        android:layout_marginStart="10dp"
+        android:layout_below="@id/img_back"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
         <EditText
@@ -113,38 +110,55 @@
         android:id="@+id/edadditems"
         android:layout_width="fill_parent"
         android:layout_height="150dp"
-        android:layout_marginTop="10dp"
         android:layout_below="@+id/linearLayoutCompat2"
+        android:layout_marginTop="10dp"
         android:background="@android:drawable/editbox_background"
+        android:editable="false"
+        android:inputType="none"
         android:textColor="@color/black"
         android:textSize="12dp"
-        android:inputType="none"
         android:textStyle="bold"></EditText>
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/bottom_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/edadditems"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="5dp"
         android:gravity="center"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btncompletetransaction"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="50dp"
+            android:background="@drawable/btn_bg_design"
+            android:text="Complete"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20dp"></Button>
 
         <Button
             android:id="@+id/btnsavedetails"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="50dp"
             android:background="@drawable/btn_bg_design"
             android:text="SAVE"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20dp"></Button>
 
+
         <Button
             android:id="@+id/btnprintreceipt"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="50dp"
-            android:layout_marginLeft="60dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="50dp"
             android:background="@drawable/btn_bg_design"
             android:text="Print"
             android:textAlignment="center"

@@ -37,4 +37,15 @@
             android:title="Set company&apos;s telephone" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:summary="Using printer"
+        android:title="Printer preferences" >
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="useprinter"
+        android:summary="Using Printer?"
+        android:title="Printer" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

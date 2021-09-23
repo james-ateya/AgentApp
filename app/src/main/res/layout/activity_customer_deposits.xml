@@ -9,6 +9,7 @@
     android:background="@drawable/app_bg_include_top">
 
     <ImageView
+        android:id="@+id/img_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -16,12 +17,15 @@
         android:onClick="Backbutton_click"
         android:src="@drawable/btn_back"></ImageView>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/relativebottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="70dp">
+        android:layout_toRightOf="@id/img_back"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="5dp"
+        android:gravity="right">
 
         <Switch
             android:id="@+id/printerswitch"
@@ -37,8 +41,8 @@
             android:textSize="18dp"
             android:thumb="@drawable/switch_selector"
             android:thumbTextPadding="10dp"
-            android:track="@drawable/customtrack" />
-    </RelativeLayout>
+            android:track="@drawable/customtrack"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayoutCompat"
@@ -60,12 +64,12 @@
             android:textColor="@color/black"></EditText>
 
         <Button
-            android:id="@+id/btnsearchdetails"
-            android:layout_width="100dp"
+            android:id="@+id/btn_generate"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@drawable/btn_bg_design"
-            android:text="Search"
+            android:text="Generate"
             android:textColor="@color/black"></Button>
 
     </LinearLayout>

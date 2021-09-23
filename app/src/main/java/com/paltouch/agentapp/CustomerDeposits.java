@@ -8,10 +8,14 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
@@ -67,7 +71,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     byte FONT_TYPE;
     //SharedPreferences sharedPref;
 
-    Button btnprintreceipt,btnsavedetails,btnsearchdetails;
+    Button btnprintreceipt,btnsavedetails,btn_generate;
     EditText edt_amount,edt_searchclient;
     TextView txt_clientname;
     Spinner spn_accounts;
@@ -95,11 +99,19 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
 
         edt_amount = (EditText) findViewById(R.id.edt_amount);
         edt_searchclient = (EditText) findViewById(R.id.edt_searchclient);
-        btnsearchdetails = (Button) findViewById(R.id.btnsearchdetails);
-        btnsearchdetails.setOnClickListener(new View.OnClickListener() {
+        btn_generate = (Button) findViewById(R.id.btn_generate);
+        btn_generate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Do Search Event
+                boolean network_state = getnetwork_state();
+                if(network_state){
+                    //Network Connected
+                    Toast.makeText(CustomerDeposits.this,"Internet Connected",Toast.LENGTH_LONG).show();
+                }else {
+                    //No Connection
+                    Toast.makeText(CustomerDeposits.this,"Internet Disconnected",Toast.LENGTH_LONG).show();
+                }
             }
         });
         txt_clientname = (TextView) findViewById(R.id.txt_clientname);
@@ -510,4 +522,66 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     String gettime() {
         return DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR);
     }
+
+    Boolean getnetwork_state(){
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (activeNetwork != null) {
+            // connected to the internet
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+                // connected to wifi
+                return true;
+            } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                // connected to mobile data
+                return true;
+            }else{
+                return false;
+            }
+        } else {
+            // not connected to the internet
+            return false;
+        }
+    }
+
+    //Async task
+    private class GetClientInfo extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+
+        }
+    }
+
+    private class SaveCollections extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+
+        }
+    }
+
 }

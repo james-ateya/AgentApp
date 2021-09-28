@@ -19,8 +19,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -48,6 +50,7 @@ public class Customer_Registration extends Activity {
     Spinner spn_document_type;
     AutoCompleteTextView edt_phonecountry;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
+    RelativeLayout customer_static_data,account_configs;
 
     ArrayList<String> list = new ArrayList<String>();
     ArrayList<String> list1 = new ArrayList<String>();
@@ -62,10 +65,20 @@ public class Customer_Registration extends Activity {
     String title2[];
     String document_type_name,document_type_id,selected_document_type_name,selected_document_type_id;
 
+    //Second Interface
+    Spinner spn_account_type,spn_lock_mode;
+    CheckBox chk_priority;
+    EditText edt_target_amount,edt_date_maturity,edt_payee_account,edt_ref;
+    boolean account_configuration = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_customer_registration);
+
+        customer_static_data = (RelativeLayout) findViewById(R.id.wrapping_panel1);
+        account_configs = (RelativeLayout) findViewById(R.id.wrapping_panel2);
 
         txt_dateofdate = (TextView) findViewById(R.id.txt_dateofbirth);
         txt_dateofdate.setOnClickListener(new View.OnClickListener() {
@@ -169,15 +182,22 @@ public class Customer_Registration extends Activity {
         });
 
         edt_document_type_id = (EditText) findViewById(R.id.edt_document_type_id);
+        second_interface_config();
     }
 
     @Override
     public void onBackPressed() {
         // TODO Auto-generated method stub
-        super.onBackPressed();
-        Intent i = new Intent(Customer_Registration.this, MainActivity.class);
-        startActivity(i);
-        Customer_Registration.this.finish();
+        if(account_configuration) {
+            customer_static_data.setVisibility(View.VISIBLE);
+            account_configs.setVisibility(View.GONE);
+            account_configuration = false;
+        }else{
+            super.onBackPressed();
+            Intent i = new Intent(Customer_Registration.this, MainActivity.class);
+            startActivity(i);
+            Customer_Registration.this.finish();
+        }
     }
 
     public void CustRegBackbutton_click(View v){
@@ -187,9 +207,25 @@ public class Customer_Registration extends Activity {
     }
 
     public void CustRegNextbutton_click(View v){
-        Intent i = new Intent(Customer_Registration.this, Customer_account_configuration.class);
-        startActivity(i);
-        //Customer_Registration.this.finish();
+        customer_static_data.setVisibility(View.GONE);
+        account_configs.setVisibility(View.VISIBLE);
+        account_configuration = true;
+    }
+
+    public void CustAccBackbutton_click(View v){
+        customer_static_data.setVisibility(View.VISIBLE);
+        account_configs.setVisibility(View.GONE);
+        account_configuration = false;
+    }
+
+    void second_interface_config(){
+        spn_account_type = (Spinner) findViewById(R.id.spn_account_type);
+        chk_priority = (CheckBox) findViewById(R.id.chk_priority);
+        spn_lock_mode = (Spinner) findViewById(R.id.spn_lock_mode);
+        edt_target_amount = (EditText) findViewById(R.id.edt_target_amount);
+        edt_date_maturity = (EditText) findViewById(R.id.edt_date_maturity);
+        edt_payee_account = (EditText) findViewById(R.id.edt_payee_account);
+        edt_ref = (EditText) findViewById(R.id.edt_ref);
     }
 
     //Async task

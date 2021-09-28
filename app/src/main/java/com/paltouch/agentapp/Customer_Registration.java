@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -69,6 +70,7 @@ public class Customer_Registration extends Activity {
     Spinner spn_account_type,spn_lock_mode;
     CheckBox chk_priority;
     EditText edt_target_amount,edt_date_maturity,edt_payee_account,edt_ref;
+    Button btn_update_details,btnsave_details;
     boolean account_configuration = false;
 
     @Override
@@ -226,6 +228,20 @@ public class Customer_Registration extends Activity {
         edt_date_maturity = (EditText) findViewById(R.id.edt_date_maturity);
         edt_payee_account = (EditText) findViewById(R.id.edt_payee_account);
         edt_ref = (EditText) findViewById(R.id.edt_ref);
+        btn_update_details = (Button) findViewById(R.id.btn_update_details);
+        btn_update_details.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        btnsave_details = (Button) findViewById(R.id.btnsave_details);
+        btnsave_details.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     //Async task

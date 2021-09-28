@@ -152,18 +152,16 @@
                 android:layout_marginLeft="10dp"
                 android:textStyle="bold"
                 android:textSize="20dp"
-                android:text="Maturity Date:"></TextView>
+                android:text="Maturity Days:"></TextView>
 
-            <TextView
+            <EditText
                 android:id="@+id/date_maturity"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginLeft="10dp"
-                android:background="@drawable/borders"
                 android:gravity="center"
-                android:hint="Click to set date"
                 android:textSize="20dp"
-                android:textStyle="bold"></TextView>
+                android:textStyle="bold"></EditText>
         </LinearLayout>
 
         <LinearLayout

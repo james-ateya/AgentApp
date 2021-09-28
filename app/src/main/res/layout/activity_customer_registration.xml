@@ -128,6 +128,34 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/txt_phone_country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:text="Phone Country:"></TextView>
+
+        <AutoCompleteTextView
+            android:id="@+id/edt_phonecountry"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:textSize="20dp"></AutoCompleteTextView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_top4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linear_top3"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:orientation="horizontal">
+
+        <TextView
             android:id="@+id/txt_phone_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -147,7 +175,66 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linear_top4"
+        android:id="@+id/linear_top5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linear_top4"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txt_physical_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:text="Physical Location:"></TextView>
+
+        <EditText
+            android:id="@+id/edt_physical_location"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:textSize="20dp"></EditText>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_top6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linear_top5"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txt_dob"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:text="Date of Birth:"></TextView>
+
+        <TextView
+            android:id="@+id/txt_dateofbirth"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/borders"
+            android:gravity="center"
+            android:hint="Click to set date"
+            android:textSize="20dp"
+            android:textStyle="bold"></TextView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="right"

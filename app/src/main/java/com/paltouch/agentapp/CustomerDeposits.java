@@ -17,6 +17,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -25,6 +27,8 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -33,10 +37,21 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,11 +86,22 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     Thread workerThread;
     String msgprnt;
     byte FONT_TYPE;
-    //SharedPreferences sharedPref;
+
+    ArrayList<String> list = new ArrayList<String>();
+    ArrayList<String> list1 = new ArrayList<String>();
+    boolean data_back = false;
+    String title[];
+    private String client_name,phone_no,member_no;
+    private String account_name,account_no;
+    String selected_account_name,selected_account_no;
+    JSONArray allocations;
+    JSONObject collected_data;
+    double total_amount = 0.0;
 
     Boolean useprinter;
     Button btnprintreceipt,btnsavedetails,btn_generate,btncompletetransaction;
-    EditText edt_amount,edt_searchclient,edadditems;
+    EditText edt_amount,edadditems;
+    EditText edt_searchclient;
     TextView txt_clientname;
     Spinner spn_accounts;
     @Override
@@ -104,14 +130,21 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         currentprinter = sharedPref.getString("printermac", "00:02:5B:B3:8A:BF");
         printerdevice = mBluetoothAdapter.getRemoteDevice(currentprinter);
 
+        collected_data = new JSONObject();
+        allocations = new JSONArray();
+
         edt_amount = (EditText) findViewById(R.id.edt_amount);
-        edt_searchclient = (EditText) findViewById(R.id.edt_searchclient);
         edadditems = (EditText) findViewById(R.id.edadditems);
+        edt_searchclient = (EditText) findViewById(R.id.edt_searchclient);
+
         btn_generate = (Button) findViewById(R.id.btn_generate);
         btn_generate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Do Search Event
+                list.clear();
+                list1.clear();
+                title = new String[0];
                 boolean network_state = getnetwork_state();
                 if(network_state){
                     //Network Connected
@@ -124,6 +157,18 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         });
         txt_clientname = (TextView) findViewById(R.id.txt_clientname);
         spn_accounts = (Spinner) findViewById(R.id.spn_accounts);
+        spn_accounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected_account_name = (String) title[position];
+                selected_account_no = list1.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
         printerswitch = (Switch) findViewById(R.id.printerswitch);
@@ -131,37 +176,47 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 "printer");
         printerswitch.setOnCheckedChangeListener(CustomerDeposits.this);
 
-        btnsavedetails = (Button) findViewById(R.id.btnsavedetails);
-        btnsavedetails.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //upload details to the server
-
-            }
-        });
-
         btncompletetransaction = (Button) findViewById(R.id.btncompletetransaction);
         btncompletetransaction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Save batch transactions
+                try {
+                    collected_data.put("account_no",selected_account_no);
+                    collected_data.put("amount",edt_amount.getText().toString());
+                    allocations.put(collected_data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                total_amount = Double.parseDouble(edt_amount.getText().toString());
+                total_amount = + total_amount;
+
                 List<String> Account_name = new ArrayList<String>();
-                Account_name.add("RENT");
-                Account_name.add("NHIF");
-                Account_name.add("SCHOOL FEES");
+                Account_name.add(selected_account_name);
 
                 List<String> Amount = new ArrayList<String>();
-                Amount.add("1");
-                Amount.add("2");
-                Amount.add("3");
+                Amount.add(edt_amount.getText().toString());
 
                 StringBuffer sbitems = new StringBuffer();
                 for(int i = 0;i<Account_name.size();i++ ) {
                     sbitems.append(Account_name.get(i) + ": " + Amount.get(i) + "\n");
                 }
+                sbitems.append("Total: " + total_amount);
                 edadditems.setText("");
                 edadditems.setText("");
                 edadditems.setText(sbitems.toString());
+            }
+        });
+
+        btnsavedetails = (Button) findViewById(R.id.btnsavedetails);
+        btnsavedetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(getnetwork_state()){
+                    SaveCollections savedata =  new SaveCollections();
+                    savedata.execute();
+                }
             }
         });
 
@@ -591,43 +646,381 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
 
     //Async task
     private class GetClientInfo extends AsyncTask<Void, Void, Void> {
-
+        ProgressDialog pDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+            pDialog = new ProgressDialog(CustomerDeposits.this);
+            pDialog.setMessage("Loading client details...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Employees/OfficerMembers/GetOfficerMemberAccounts";
+            JSONObject object1,object2,object3;
+            JSONArray s;
+            s = new JSONArray();
+            object1 = new JSONObject();
+            object2 = new JSONObject();
+            object3 = new JSONObject();
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                object1.put("take","10000");
+                object1.put("skip","0");
+                object2.put("logic","AND");
+                object3.put("value",edt_searchclient.getText().toString());
+                object3.put("field","member_no");
+                object3.put("operator","equals");
+                s.put(object3);
+                object2.put("filters",s);
+                object1.put("filter",object2);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+
+                    client_name = JsonResultVeriy.getString("client_name");
+                    phone_no = JsonResultVeriy.getString("phone_no");
+                    member_no = JsonResultVeriy.getString("member_no");
+
+                    JSONArray accountlists = JsonResultVeriy.getJSONArray("account_list");
+                    int tr = accountlists.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < accountlists.length(); i++) {
+
+                            //result = verifyresult3.getJSONObject(i).toString(i);
+                            JSONObject verifyresult2 = accountlists.getJSONObject(i);
+
+                            account_name = verifyresult2.getString("account_name");
+                            account_no = verifyresult2.getString("account_no");
+
+                            data_back = true;
+                            list.add(account_name);
+                            list1.add(account_no);
+                        }
+
+                        //Read the list
+                        if (list.size() <= 0) {
+                            //Throw Error. No Record Found
+                            data_back = false;
+                            Message msg = mhandler.obtainMessage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("MSG_KEY", "No data returned from the server while fetching stations. Please consult system admin.");
+                            msg.setData(bundle);
+                            msg.what = 2;
+                            mhandler.sendMessage(msg);
+                        } else {
+                            //Convert list to array
+                            title = list.toArray(new String[list.size()]);
+                            data_back = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        data_back = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "No records returned from server while fetching user stations.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                } else {
+                    data_back = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                e.printStackTrace();
+                data_back = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if (data_back) {
+                //Load Data to Interface
+                edt_searchclient.setText(member_no);
+                txt_clientname.setText(client_name);
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(CustomerDeposits.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_accounts.setAdapter(AccountsApapdter); // causes nullpointerexception
 
+            }else{
+                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
+                return;
+            }
         }
     }
 
     private class SaveCollections extends AsyncTask<Void, Void, Void> {
-
+        ProgressDialog pDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+            pDialog = new ProgressDialog(CustomerDeposits.this);
+            pDialog.setMessage("Sending Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/";
+            JSONObject object1;
+            object1 = new JSONObject();
 
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                object1.put("client_no",member_no);
+                object1.put("agent_no","0");
+                object1.put("amount",total_amount);
+                object1.put("allocations",allocations);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+
+
+                } else {
+                    data_back = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                e.printStackTrace();
+                data_back = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void file_url) {
-
+            collected_data = new JSONObject();
+            allocations = new JSONArray();
+            total_amount = 0.0;
+            edt_amount.setText("");
+            edt_searchclient.setText("");
+            txt_clientname.setText("");
         }
     }
+
+    Handler mhandler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Bundle bundle1 = msg.getData();
+                    String string1 = bundle1.getString("MSG_KEY");
+                    new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.ERROR_TYPE).setTitleText("SORRY").setContentText(string1).show();
+
+                    break;
+
+                case 2:
+                    Bundle bundle2 = msg.getData();
+                    String string2 = bundle2.getString("MSG_KEY");
+                    new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.ERROR_TYPE).setTitleText("SORRY").setContentText(string2).show();
+
+                    break;
+                case 3:
+
+                    break;
+                case 4:
+                    Bundle bundle = msg.getData();
+                    String string = bundle.getString("MSG_KEY");
+                    new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.SUCCESS_TYPE).
+                            setTitleText("SUCCESS!").setContentText(string).
+                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sDialog) {
+                                    sDialog.dismissWithAnimation();
+                                }
+                            }).
+                            show();
+
+                    break;
+                case 5:
+                    Bundle bundle5 = msg.getData();
+                    String string5 = bundle5.getString("MSG_KEY");
+                    new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.ERROR_TYPE).setTitleText("SORRY").setContentText(string5).show();
+
+                    break;
+
+                case 6:
+                    Bundle bundle6 = msg.getData();
+                    String string6 = bundle6.getString("MSG_KEY");
+                    new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.SUCCESS_TYPE).
+                            setTitleText("SUCCESS!").setContentText(string6).
+                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sDialog) {
+                                    sDialog.dismissWithAnimation();
+                                }
+                            }).
+                            show();
+
+                    break;
+
+                case 7:
+                    Bundle bundle7 = msg.getData();
+                    String string7 = bundle7.getString("MSG_KEY");
+                    new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.ERROR_TYPE).
+                            setTitleText("SORRY").setContentText(string7).
+                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sDialog) {
+                                    sDialog.dismissWithAnimation();
+                                    Intent main = new Intent(getApplicationContext(),MainActivity.class);
+                                    startActivity(main);
+                                    CustomerDeposits.this.finish();
+                                }
+                            }).
+                            show();
+
+                    break;
+                case 8:
+                    if (getnetwork_state())
+                    {
+                        //Do Something
+                    }else{
+                        //No Internet Connection
+                        new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                    }
+
+                    break;
+            }
+
+        };
+    };
 
 }

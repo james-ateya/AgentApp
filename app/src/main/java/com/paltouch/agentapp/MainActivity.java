@@ -39,9 +39,9 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(View view) {
                     if(getnetwork_state()) {
-                        Active_session = false;
-                        check_loggedin check_session = new check_loggedin();
-                        check_session.execute();
+                        Active_session = true;
+                        //check_loggedin check_session = new check_loggedin();
+                        //check_session.execute();
                         if (Active_session) {
                             Intent customerdeposits = new Intent(MainActivity.this, CustomerDeposits.class);
                             startActivity(customerdeposits);
@@ -67,18 +67,18 @@ public class MainActivity extends Activity {
         btn_customer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(getnetwork_state()) {
-                    Active_session = false;
-                    check_loggedin check_session = new check_loggedin();
-                    check_session.execute();
-                    if (Active_session) {
+                //if(getnetwork_state()) {
+                //    Active_session = false;
+                //    check_loggedin check_session = new check_loggedin();
+                //    check_session.execute();
+                //    if (Active_session) {
                         Intent iscustomer_reg = new Intent(MainActivity.this, Customer_Registration.class);
                         startActivity(iscustomer_reg);
                         MainActivity.this.finish();
-                    }
-                }else{
-                    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
-                }
+                //    }
+                //}else{
+                //    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                //}
             }
         });
 

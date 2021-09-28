@@ -94,9 +94,12 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     private String client_name,phone_no,member_no;
     private String account_name,account_no;
     String selected_account_name,selected_account_no;
-    JSONArray allocations;
+    ArrayList<String> allocations;
     JSONObject collected_data;
-    double total_amount = 0.0;
+    ArrayList<String> total_amount = new ArrayList<String>();
+    StringBuffer sbitems = new StringBuffer();
+    Double totalC = 0.0;
+    JSONArray s = new JSONArray();
 
     Boolean useprinter;
     Button btnprintreceipt,btnsavedetails,btn_generate,btncompletetransaction;
@@ -131,7 +134,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         printerdevice = mBluetoothAdapter.getRemoteDevice(currentprinter);
 
         collected_data = new JSONObject();
-        allocations = new JSONArray();
+        allocations = new ArrayList<String>();
 
         edt_amount = (EditText) findViewById(R.id.edt_amount);
         edadditems = (EditText) findViewById(R.id.edadditems);
@@ -160,8 +163,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         spn_accounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected_account_name = (String) title[position];
-                selected_account_no = list1.get(position);
+                //selected_account_name = (String) title[position];
+                //selected_account_no = list1.get(position);
+                selected_account_name = spn_accounts.getSelectedItem().toString();
             }
 
             @Override
@@ -182,15 +186,15 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             public void onClick(View v) {
                 //Save batch transactions
                 try {
-                    collected_data.put("account_no",selected_account_no);
+                    collected_data.put("account_no","101");
                     collected_data.put("amount",edt_amount.getText().toString());
-                    allocations.put(collected_data);
+                    allocations.add(collected_data.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                total_amount = Double.parseDouble(edt_amount.getText().toString());
-                total_amount = + total_amount;
+                String total_amount1 = edt_amount.getText().toString();
+                total_amount.add(total_amount1);
 
                 List<String> Account_name = new ArrayList<String>();
                 Account_name.add(selected_account_name);
@@ -198,14 +202,19 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 List<String> Amount = new ArrayList<String>();
                 Amount.add(edt_amount.getText().toString());
 
-                StringBuffer sbitems = new StringBuffer();
+                StringBuffer sbitems2 = new StringBuffer();
+
                 for(int i = 0;i<Account_name.size();i++ ) {
                     sbitems.append(Account_name.get(i) + ": " + Amount.get(i) + "\n");
                 }
-                sbitems.append("Total: " + total_amount);
+
+                for (int i = 0; i < total_amount.size(); i++) {
+                    totalC = totalC + Double.valueOf(total_amount.get(i));
+                }
+                sbitems2.append("Total: " + totalC);
                 edadditems.setText("");
-                edadditems.setText("");
-                edadditems.setText(sbitems.toString());
+                edadditems.setText(sbitems.toString() + "\n" + sbitems2.toString());
+
             }
         });
 
@@ -213,10 +222,11 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         btnsavedetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(getnetwork_state()){
-                    SaveCollections savedata =  new SaveCollections();
-                    savedata.execute();
-                }
+                s.put(allocations);
+                //if(getnetwork_state()){
+                //    SaveCollections savedata =  new SaveCollections();
+                //    savedata.execute();
+                //}
             }
         });
 
@@ -835,7 +845,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         protected Void doInBackground(Void... params) {
             String serviceurl = GlobalVariables.surl +"/";
             JSONObject object1;
+            JSONArray object2;
             object1 = new JSONObject();
+            object2 = new JSONArray();
 
             URL url = null;
             try {
@@ -846,8 +858,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             try {
                 object1.put("client_no",member_no);
                 object1.put("agent_no","0");
-                object1.put("amount",total_amount);
-                object1.put("allocations",allocations);
+                object1.put("amount",totalC);
+                object2.put(allocations);
+                object1.put("allocations",object2);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -924,8 +937,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         @Override
         protected void onPostExecute(Void file_url) {
             collected_data = new JSONObject();
-            allocations = new JSONArray();
-            total_amount = 0.0;
+            allocations.clear();
+            total_amount.clear();
+            totalC = 0.0;
             edt_amount.setText("");
             edt_searchclient.setText("");
             txt_clientname.setText("");

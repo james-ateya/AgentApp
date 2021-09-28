@@ -51,7 +51,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Client Name"></TextView>
+            android:text="@string/txt_clientname"></TextView>
 
         <EditText
             android:id="@+id/Edt_Customername"
@@ -68,7 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linear_top"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -78,7 +78,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Document Type:"></TextView>
+            android:text="@string/txt_document_type"></TextView>
 
         <Spinner
             android:id="@+id/spn_document_type"
@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linear_top1"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -106,7 +106,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Document Type ID:"></TextView>
+            android:text="@string/txt_document_type_id"></TextView>
 
         <EditText
             android:id="@+id/edt_document_type_id"
@@ -124,7 +124,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linear_top2"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -134,7 +134,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Phone Country:"></TextView>
+            android:text="@string/txt_phone_country"></TextView>
 
         <AutoCompleteTextView
             android:id="@+id/edt_phonecountry"
@@ -152,7 +152,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linear_top3"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -162,7 +162,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Phone Number:"></TextView>
+            android:text="@string/txt_phone_number"></TextView>
 
         <EditText
             android:id="@+id/edt_phonenumber"
@@ -170,7 +170,8 @@
             android:layout_height="50dp"
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
-            android:textSize="20dp"></EditText>
+            android:textSize="20dp"
+            android:inputType="phone"></EditText>
 
     </LinearLayout>
 
@@ -180,7 +181,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linear_top4"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -190,7 +191,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Physical Location:"></TextView>
+            android:text="@string/txt_physical_location"></TextView>
 
         <EditText
             android:id="@+id/edt_physical_location"
@@ -208,7 +209,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/linear_top5"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -218,7 +219,7 @@
             android:layout_marginLeft="10dp"
             android:textStyle="bold"
             android:textSize="20dp"
-            android:text="Date of Birth:"></TextView>
+            android:text="@string/txt_dob"></TextView>
 
         <TextView
             android:id="@+id/txt_dateofbirth"

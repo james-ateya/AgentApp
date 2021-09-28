@@ -53,7 +53,7 @@
                 android:layout_marginLeft="10dp"
                 android:textStyle="bold"
                 android:textSize="20dp"
-                android:text="Select Account:"></TextView>
+                android:text="@string/txt_select_account"></TextView>
 
             <Spinner
                 android:id="@+id/spn_account_type"
@@ -79,7 +79,7 @@
                 android:id="@+id/chk_priority"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="Select Priority"
+                android:text="Set as Priority Account"
                 android:textStyle="bold"
                 android:textSize="20dp"
                 android:layout_marginLeft="10dp"></CheckBox>
@@ -100,7 +100,7 @@
                 android:layout_marginLeft="10dp"
                 android:textStyle="bold"
                 android:textSize="20dp"
-                android:text="Lock Mode:"></TextView>
+                android:text="@string/txt_lock_mode"></TextView>
 
             <Spinner
                 android:id="@+id/spn_lock_mode"
@@ -126,7 +126,7 @@
                 android:layout_marginLeft="10dp"
                 android:textStyle="bold"
                 android:textSize="20dp"
-                android:text="Target Amount:"></TextView>
+                android:text="@string/txt_target"></TextView>
 
             <EditText
                 android:id="@+id/edt_target_amount"
@@ -134,7 +134,8 @@
                 android:layout_height="50dp"
                 android:layout_marginLeft="10dp"
                 android:textStyle="bold"
-                android:textSize="20dp"></EditText>
+                android:textSize="20dp"
+                android:inputType="numberDecimal"></EditText>
         </LinearLayout>
 
         <LinearLayout
@@ -152,7 +153,7 @@
                 android:layout_marginLeft="10dp"
                 android:textStyle="bold"
                 android:textSize="20dp"
-                android:text="Maturity Days:"></TextView>
+                android:text="@string/txt_maturity_date"></TextView>
 
             <EditText
                 android:id="@+id/date_maturity"
@@ -161,7 +162,8 @@
                 android:layout_marginLeft="10dp"
                 android:gravity="center"
                 android:textSize="20dp"
-                android:textStyle="bold"></EditText>
+                android:textStyle="bold"
+                android:inputType="number"></EditText>
         </LinearLayout>
 
         <LinearLayout

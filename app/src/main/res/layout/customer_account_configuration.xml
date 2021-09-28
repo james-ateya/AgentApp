@@ -156,7 +156,7 @@
                 android:text="@string/txt_maturity_date"></TextView>
 
             <EditText
-                android:id="@+id/date_maturity"
+                android:id="@+id/edt_date_maturity"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginLeft="10dp"

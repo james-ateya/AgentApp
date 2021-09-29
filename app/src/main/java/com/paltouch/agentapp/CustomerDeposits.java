@@ -150,8 +150,8 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 title = new String[0];
                 boolean network_state = getnetwork_state();
                 if(network_state){
-                    //Network Connected
-                    Toast.makeText(CustomerDeposits.this,"Internet Connected",Toast.LENGTH_LONG).show();
+                    GetClientInfo getinfo = new GetClientInfo();
+                    getinfo.execute();
                 }else {
                     //No Connection
                     Toast.makeText(CustomerDeposits.this,"Internet Disconnected",Toast.LENGTH_LONG).show();
@@ -163,9 +163,13 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         spn_accounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //selected_account_name = (String) title[position];
-                //selected_account_no = list1.get(position);
-                selected_account_name = spn_accounts.getSelectedItem().toString();
+                try {
+                    selected_account_name = (String) title[position];
+                    selected_account_no = list1.get(position);
+                    //selected_account_name = spn_accounts.getSelectedItem().toString();
+                }catch (Exception e){
+                    Log.v("Error: ",e.getMessage());
+                }
             }
 
             @Override
@@ -186,7 +190,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             public void onClick(View v) {
                 //Save batch transactions
                 try {
-                    collected_data.put("account_no","101");
+                    collected_data.put("account_no",selected_account_no);
                     collected_data.put("amount",edt_amount.getText().toString());
                     allocations.add(collected_data.toString());
                 } catch (JSONException e) {
@@ -222,11 +226,10 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         btnsavedetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                s.put(allocations);
-                //if(getnetwork_state()){
-                //    SaveCollections savedata =  new SaveCollections();
-                //    savedata.execute();
-                //}
+                if(getnetwork_state()){
+                    SaveCollections savedata =  new SaveCollections();
+                    savedata.execute();
+                }
             }
         });
 
@@ -669,7 +672,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Employees/OfficerMembers/GetOfficerMemberAccounts";
+            String serviceurl = GlobalVariables.surl +"/Agency/Client/GetDetails/"+edt_searchclient.getText().toString();
             JSONObject object1,object2,object3;
             JSONArray s;
             s = new JSONArray();
@@ -682,7 +685,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-            try {
+            /*
                 object1.put("take","10000");
                 object1.put("skip","0");
                 object2.put("logic","AND");
@@ -692,9 +695,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 s.put(object3);
                 object2.put("filters",s);
                 object1.put("filter",object2);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+
+                 */
+
 
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -727,12 +730,13 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONObject jresponse = JsonResultVeriy.getJSONObject("Result");
 
-                    client_name = JsonResultVeriy.getString("client_name");
-                    phone_no = JsonResultVeriy.getString("phone_no");
-                    member_no = JsonResultVeriy.getString("member_no");
+                    client_name = jresponse.getString("client_name");
+                    phone_no = jresponse.getString("phone_no");
+                    member_no = jresponse.getString("client_no");
 
-                    JSONArray accountlists = JsonResultVeriy.getJSONArray("account_list");
+                    JSONArray accountlists = jresponse.getJSONArray("account_list");
                     int tr = accountlists.length();
                     if (tr >= 1) {
                         for (int i = 0; i < accountlists.length(); i++) {
@@ -751,6 +755,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                         //Read the list
                         if (list.size() <= 0) {
                             //Throw Error. No Record Found
+                            if (pDialog.isShowing()) {
+                                pDialog.dismiss();
+                            }
                             data_back = false;
                             Message msg = mhandler.obtainMessage();
                             Bundle bundle = new Bundle();
@@ -765,6 +772,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                         }
                     }else{
                         //Throw Error. No Record Found
+                        if (pDialog.isShowing()) {
+                            pDialog.dismiss();
+                        }
                         data_back = false;
                         Message msg = mhandler.obtainMessage();
                         Bundle bundle = new Bundle();
@@ -775,6 +785,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     }
 
                 } else {
+                    if (pDialog.isShowing()) {
+                        pDialog.dismiss();
+                    }
                     data_back = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -797,6 +810,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     mhandler.sendMessage(msg1);
                 }
             } catch (IOException | JSONException e) {
+                if (pDialog.isShowing()) {
+                    pDialog.dismiss();
+                }
                 e.printStackTrace();
                 e.printStackTrace();
                 data_back = false;
@@ -814,6 +830,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         protected void onPostExecute(Void file_url) {
             if (data_back) {
                 //Load Data to Interface
+                if (pDialog.isShowing()) {
+                    pDialog.dismiss();
+                }
                 edt_searchclient.setText(member_no);
                 txt_clientname.setText(client_name);
                 final ArrayAdapter<String> AccountsApapdter =
@@ -823,6 +842,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 spn_accounts.setAdapter(AccountsApapdter); // causes nullpointerexception
 
             }else{
+                if (pDialog.isShowing()) {
+                    pDialog.dismiss();
+                }
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
                 return;
             }

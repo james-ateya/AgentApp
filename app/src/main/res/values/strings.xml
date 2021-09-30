@@ -16,7 +16,6 @@
     <string name="txt_maturity_date">Maturity Days:<font color='#FF0000'>*</font></string>
 
 
-
     <string-array name="Accounts_to_select">
         <item>Deposits</item>
         <item>House Rent</item>

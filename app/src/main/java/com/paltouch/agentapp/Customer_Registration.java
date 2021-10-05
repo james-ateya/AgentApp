@@ -13,14 +13,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -48,8 +44,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 public class Customer_Registration extends Activity {
     TextView txt_dateofdate;
     EditText Edt_Customername,edt_document_type_id,edt_phonenumber,edt_physical_location;
-    Spinner spn_document_type;
-    AutoCompleteTextView edt_phonecountry;
+    Spinner spn_document_type,spn_phonecountry;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     RelativeLayout customer_static_data,account_configs;
 
@@ -66,11 +61,23 @@ public class Customer_Registration extends Activity {
     String title2[];
     String document_type_name,document_type_id,selected_document_type_name,selected_document_type_id;
 
+    ArrayList<String> list4 = new ArrayList<String>();
+    ArrayList<String> list5 = new ArrayList<String>();
+    boolean data_back3 = false;
+    String title3[];
+    String AccountTypeName,AccountTypeId,selected_account_name,selected_account_id;
+
+    ArrayList<String> list_timeschedule = new ArrayList<String>();
+    ArrayList<String> list2_timeschedule = new ArrayList<String>();
+    boolean data_back_timeschdule;
+    String title_timeschedule[];
+    String timeschdule_name,timeschdule_id,selected_timeschdule_name,selected_timeschdule_id;
+
     //Second Interface
-    Spinner spn_account_type,spn_lock_mode;
-    CheckBox chk_priority;
-    EditText edt_target_amount,edt_date_maturity,edt_payee_account,edt_ref;
-    Button btn_update_details,btnsave_details;
+    Spinner spn_account_type,spn_lock_mode,spn_gendertypes;
+    EditText edt_target_amount,edt_payee_account,edt_ref;
+    TextView txt_date_of_maturity;
+    Button btn_update_details,btnsave_details,btn_next;
     boolean account_configuration = false;
 
     @Override
@@ -110,59 +117,19 @@ public class Customer_Registration extends Activity {
             }
         };
 
-        edt_phonecountry = (AutoCompleteTextView) findViewById(R.id.edt_phonecountry);
-        edt_phonecountry.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        spn_phonecountry = (Spinner) findViewById(R.id.spn_phonecountry);
+        spn_phonecountry.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Get selected item and ID
+            }
 
-                phonecountry_selected = adapterView.getItemAtPosition(i).toString();
-                phonecountry_id = list1.get(i);
-                edt_phonecountry.setText(phonecountry_selected);
-                edt_phonecountry.dismissDropDown();
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 
-        edt_phonecountry.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (edt_phonecountry.isPerformingCompletion()) {
-                    // An item has been selected from the list. Ignore.
-                    return;
-                }
-                if (getnetwork_state()) {
-                    //Do Something
-                    list.clear();
-                    list1.clear();
-                    title = new String[0];
-                    GetPhoneCountryCodes CountryCodes = new GetPhoneCountryCodes();
-                    CountryCodes.execute();
-                } else {
-                    //No Internet Connection
-                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
-                            setTitleText("NO INTERNET").
-                            setContentText("Make sure you have internet connection.").
-                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sDialog) {
-                                    sDialog.dismissWithAnimation();
-                                    Intent main = new Intent(getApplicationContext(),MainActivity.class);
-                                    startActivity(main);
-                                    Customer_Registration.this.finish();
-                                }
-                            }).show();
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
 
         edt_phonenumber = (EditText) findViewById(R.id.edt_phonenumber);
 
@@ -184,6 +151,16 @@ public class Customer_Registration extends Activity {
         });
 
         edt_document_type_id = (EditText) findViewById(R.id.edt_document_type_id);
+
+        btn_next = (Button) findViewById(R.id.btn_next);
+        btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            //Check if suppied ID exists
+                CheckifIDexists check = new CheckifIDexists();
+                check.execute();
+            }
+        });
         second_interface_config();
     }
 
@@ -208,12 +185,6 @@ public class Customer_Registration extends Activity {
         Customer_Registration.this.finish();
     }
 
-    public void CustRegNextbutton_click(View v){
-        customer_static_data.setVisibility(View.GONE);
-        account_configs.setVisibility(View.VISIBLE);
-        account_configuration = true;
-    }
-
     public void CustAccBackbutton_click(View v){
         customer_static_data.setVisibility(View.VISIBLE);
         account_configs.setVisibility(View.GONE);
@@ -222,12 +193,45 @@ public class Customer_Registration extends Activity {
 
     void second_interface_config(){
         spn_account_type = (Spinner) findViewById(R.id.spn_account_type);
-        chk_priority = (CheckBox) findViewById(R.id.chk_priority);
+        spn_account_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected_account_name = (String) title3[position];
+                selected_account_id = list5.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spn_gendertypes = (Spinner) findViewById(R.id.spn_gendertypes);
+        spn_gendertypes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         spn_lock_mode = (Spinner) findViewById(R.id.spn_lock_mode);
+        spn_lock_mode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected_timeschdule_name = (String) title_timeschedule[position];
+                selected_timeschdule_id = list2_timeschedule.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         edt_target_amount = (EditText) findViewById(R.id.edt_target_amount);
-        edt_date_maturity = (EditText) findViewById(R.id.edt_date_maturity);
-        edt_payee_account = (EditText) findViewById(R.id.edt_payee_account);
-        edt_ref = (EditText) findViewById(R.id.edt_ref);
+        txt_date_of_maturity = (TextView) findViewById(R.id.txt_date_of_maturity);
         btn_update_details = (Button) findViewById(R.id.btn_update_details);
         btn_update_details.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -246,43 +250,28 @@ public class Customer_Registration extends Activity {
 
     //Async task
     private class GetPhoneCountryCodes extends AsyncTask<Void, Void, Void> {
-
+        ProgressDialog pDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Employees/OfficerMembers/GetCountryCode";
-            JSONObject object1,object2, object3;
-            JSONArray s;
-            s = new JSONArray();
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetCountryCode";
+            JSONObject object1;
             object1 = new JSONObject();
-            object2 = new JSONObject();
-            object3 = new JSONObject();
             URL url = null;
             try {
                 url = new URL(serviceurl);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-            try {
-                object1.put("take","10000");
-                object1.put("skip","0");
-                object2.put("logic","and");
-                object3.put("value",edt_phonecountry.getText().toString());
-                object3.put("field","ClientNo");
-                object3.put("operator","equals");
-                object3.put("ignoreCase","true");
-                s.put(object3);
-                object2.put("filters",s);
-                object1.put("filter",object2);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
                 conn.setRequestMethod("POST");
@@ -314,18 +303,18 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-                    JSONArray country_list = JsonResultVeriy.getJSONArray("Result");
-                    int tr = country_list.length();
+                    JSONArray Documenttypes = JsonResultVeriy.getJSONArray("Result");
+                    int tr = Documenttypes.length();
                     if (tr >= 1) {
-                        for (int i = 0; i < country_list.length(); i++) {
-                            JSONObject verifyresult2 = country_list.getJSONObject(i);
+                        for (int i = 0; i < Documenttypes.length(); i++) {
+                            JSONObject verifyresult2 = Documenttypes.getJSONObject(i);
 
-                            country_name = verifyresult2.getString("name");
-                            country_id = verifyresult2.getString("name");
+                            document_type_name = verifyresult2.getString("Name");
+                            document_type_id = verifyresult2.getString("Id");
 
                             data_back = true;
-                            list.add(country_name);
-                            list1.add(country_id);
+                            list.add(document_type_name);
+                            list1.add(document_type_id);
                         }
 
                         //Read the list
@@ -334,7 +323,7 @@ public class Customer_Registration extends Activity {
                             data_back = false;
                             Message msg = mhandler.obtainMessage();
                             Bundle bundle = new Bundle();
-                            bundle.putString("MSG_KEY", "No data returned from the server while fetching stations. Please consult system admin.");
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting document types. Please consult system admin.");
                             msg.setData(bundle);
                             msg.what = 2;
                             mhandler.sendMessage(msg);
@@ -345,16 +334,22 @@ public class Customer_Registration extends Activity {
                         }
                     }else{
                         //Throw Error. No Record Found
+                        if(pDialog.isShowing()){
+                            pDialog.dismiss();
+                        }
                         data_back = false;
                         Message msg = mhandler.obtainMessage();
                         Bundle bundle = new Bundle();
-                        bundle.putString("MSG_KEY", "No records returned from server while fetching user stations.");
+                        bundle.putString("MSG_KEY", "No records returned from server while getting document types.");
                         msg.setData(bundle);
                         msg.what = 2;
                         mhandler.sendMessage(msg);
                     }
 
                 } else {
+                    if(pDialog.isShowing()){
+                        pDialog.dismiss();
+                    }
                     data_back = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -378,7 +373,9 @@ public class Customer_Registration extends Activity {
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-                e.printStackTrace();
+                if(pDialog.isShowing()){
+                    pDialog.dismiss();
+                }
                 data_back = false;
                 Message msg1 = mhandler.obtainMessage();
                 Bundle bundle1 = new Bundle();
@@ -392,11 +389,16 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
             if (data_back) {
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>
-                        (Customer_Registration.this,android.R.layout.select_dialog_item,title);
-                edt_phonecountry.setAdapter(adapter);
-                edt_phonecountry.showDropDown();
+                //Load Data to Interface
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_phonecountry.setAdapter(AccountsApapdter); // causes nullpointerexception
 
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
@@ -563,6 +565,431 @@ public class Customer_Registration extends Activity {
         }
     }
 
+    private class CheckifIDexists extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Checking Identification Document...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GenerateAgentDetailsFromNatId";
+            JSONObject object1;
+            object1 = new JSONObject();
+
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                object1.put("NationalId",edt_document_type_id.getText().toString());
+                object1.put("DocumentTypeId",selected_document_type_id);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray check_id = JsonResultVeriy.getJSONArray("Result");
+                    data_back2 = true;
+                } else {
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("TechnicalMessage");
+                    System.out.println("TechnicalMessage >>>>>>" + response_errormessage);
+                    if(response_errormessage.equalsIgnoreCase("NotFound")){
+                        data_back2 = false;
+                    }else{
+                        if(pDialog.isShowing()){
+                            pDialog.dismiss();
+                        }
+                        Message msg1 = mhandler.obtainMessage();
+                        Bundle bundle1 = new Bundle();
+                        bundle1.putString("MSG_KEY", response_errormessage);
+                        msg1.setData(bundle1);
+                        msg1.what = 5;
+                        mhandler.sendMessage(msg1);
+                    }
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                if(pDialog.isShowing()){
+                    pDialog.dismiss();
+                }
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if (data_back2) {
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "The Customer is already registered, use his/her ID Number as account number.");
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }else{
+                if(pDialog.isShowing()){
+                    pDialog.dismiss();
+                }
+                customer_static_data.setVisibility(View.GONE);
+                account_configs.setVisibility(View.VISIBLE);
+                account_configuration = true;
+            }
+        }
+    }
+
+    private class GetDefaultCustomerAccounts extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetDefaultAccounts";
+            JSONObject object1;
+            object1 = new JSONObject();
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray Documenttypes = JsonResultVeriy.getJSONArray("Result");
+                    int tr = Documenttypes.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < Documenttypes.length(); i++) {
+                            JSONObject verifyresult2 = Documenttypes.getJSONObject(i);
+
+                            AccountTypeName = verifyresult2.getString("AccountTypeName");
+                            AccountTypeId = verifyresult2.getString("AccountTypeId");
+
+                            data_back3 = true;
+                            list4.add(AccountTypeName);
+                            list5.add(AccountTypeId);
+                        }
+
+                        //Read the list
+                        if (list4.size() <= 0) {
+                            //Throw Error. No Record Found
+                            data_back3 = false;
+                            Message msg = mhandler.obtainMessage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("MSG_KEY", "No data returned from the server while fetching stations. Please consult system admin.");
+                            msg.setData(bundle);
+                            msg.what = 2;
+                            mhandler.sendMessage(msg);
+                        } else {
+                            //Convert list to array
+                            title3 = list4.toArray(new String[list4.size()]);
+                            data_back3 = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        data_back3 = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "No records returned from server while fetching user stations.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                } else {
+                    data_back3 = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                data_back3 = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if (data_back3) {
+                //Load Data to Interface
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_account_type.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+            }else{
+                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
+                return;
+            }
+        }
+    }
+
+    private class GetTimeSchedule extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetTimeSchedule";
+            JSONObject object1;
+
+            object1 = new JSONObject();
+
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray timeschdule_list = JsonResultVeriy.getJSONArray("Result");
+                    int tr = timeschdule_list.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < timeschdule_list.length(); i++) {
+                            JSONObject verifyresult2 = timeschdule_list.getJSONObject(i);
+
+                            timeschdule_name = verifyresult2.getString("Name");
+                            timeschdule_id = verifyresult2.getString("Id");
+
+                            data_back_timeschdule = true;
+                            list_timeschedule.add(timeschdule_name);
+                            list2_timeschedule.add(timeschdule_name);
+                        }
+
+                        //Read the list
+                        if (list_timeschedule.size() <= 0) {
+                            //Throw Error. No Record Found
+                            data_back_timeschdule = false;
+                            Message msg = mhandler.obtainMessage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting time schedule. Please consult system admin.");
+                            msg.setData(bundle);
+                            msg.what = 2;
+                            mhandler.sendMessage(msg);
+                        } else {
+                            //Convert list to array
+                            title_timeschedule = list_timeschedule.toArray(new String[list_timeschedule.size()]);
+                            data_back_timeschdule = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        data_back_timeschdule = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "No records returned from server while getting time schedules.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                } else {
+                    data_back_timeschdule = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                data_back_timeschdule = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
+            if (data_back_timeschdule) {
+                //Load Data to Interface
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_lock_mode.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+            }else{
+                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
+                return;
+            }
+        }
+    }
+
     Handler mhandler = new Handler() {
 
         @Override
@@ -603,7 +1030,16 @@ public class Customer_Registration extends Activity {
                 case 5:
                     Bundle bundle5 = msg.getData();
                     String string5 = bundle5.getString("MSG_KEY");
-                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).setTitleText("SORRY").setContentText(string5).show();
+                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
+                            setTitleText("SORRY").
+                            setContentText(string5).
+                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sDialog) {
+                                    sDialog.dismissWithAnimation();
+                                }
+                            }).
+                            show();
 
                     break;
 
@@ -616,6 +1052,9 @@ public class Customer_Registration extends Activity {
                                 @Override
                                 public void onClick(SweetAlertDialog sDialog) {
                                     sDialog.dismissWithAnimation();
+                                    Intent i = new Intent(Customer_Registration.this, MainActivity.class);
+                                    startActivity(i);
+                                    Customer_Registration.this.finish();
                                 }
                             }).
                             show();

@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -54,17 +53,21 @@ public class APK_Update extends AppCompatActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 // If you have access to the external storage, do whatever you need
+                new DownloadFilesTask().execute();
+                /*
                 if (Environment.isExternalStorageManager()){
                     File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
                     file.delete();
                     new DownloadFilesTask().execute();
-                }else{
+                }
+                else{
                     Intent intent = new Intent();
                     intent.setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                     Uri uri = Uri.fromParts("package", APK_Update.this.getPackageName(), null);
                     intent.setData(uri);
                     startActivity(intent);
                 }
+                 */
             }
         });
     }
@@ -157,7 +160,7 @@ public class APK_Update extends AppCompatActivity {
             JSch jsch = new JSch();
             try {
                 String ip = GlobalVariables.apk_download_link;
-                Session session = jsch.getSession("fresha", ip, 1989);
+                Session session = jsch.getSession("ateya", ip, 1989);
                 session.setTimeout(30000000);
                 java.util.Properties config = new java.util.Properties();
                 config.put("StrictHostKeyChecking", "no");
@@ -212,7 +215,7 @@ public class APK_Update extends AppCompatActivity {
         protected void onPostExecute(String result) {
             // dismiss the dialog after the file was downloaded
             dismissDialog(progress_bar_type);
-            installApk(btnUpdate);
+            //installApk(btnUpdate);
         }
 
     }

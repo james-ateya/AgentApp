@@ -37,7 +37,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation project(':library')
     implementation files('libs/jsch-0.1.55.jar')
-    implementation 'com.google.android.gms:play-services-appindexing:8.4.0'
+    implementation 'com.google.firebase:firebase-appindexing:10.2.1'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     //implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:design:28.0.0'

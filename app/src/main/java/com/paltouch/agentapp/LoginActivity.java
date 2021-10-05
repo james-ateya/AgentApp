@@ -117,9 +117,12 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
 
                     Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(confirm);
-                    LoginActivity.this.finish();
+                    //LoginActivity.this.finish();
                     //login_User login = new login_User();
                     //login.execute();
+
+                    //Intent a = new Intent(LoginActivity.this, APK_Update.class);
+                    //startActivity(a);
                 }
             }
         });

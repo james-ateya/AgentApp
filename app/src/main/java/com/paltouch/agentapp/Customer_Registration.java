@@ -42,11 +42,17 @@ import java.util.Calendar;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class Customer_Registration extends Activity {
-    TextView txt_dateofdate;
+    TextView txt_dateofbirth;
     EditText Edt_Customername,edt_document_type_id,edt_phonenumber,edt_physical_location;
     Spinner spn_document_type,spn_phonecountry;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
+    private DatePickerDialog.OnDateSetListener mDateSetListener_maturitydate;
     RelativeLayout customer_static_data,account_configs;
+    ArrayList<String> registration_account_list;
+    JSONObject account_list;
+    boolean data_back_registartion;
+
+
 
     ArrayList<String> list = new ArrayList<String>();
     ArrayList<String> list1 = new ArrayList<String>();
@@ -73,6 +79,12 @@ public class Customer_Registration extends Activity {
     String title_timeschedule[];
     String timeschdule_name,timeschdule_id,selected_timeschdule_name,selected_timeschdule_id;
 
+    ArrayList<String> list_gendertype = new ArrayList<String>();
+    ArrayList<String> list2_gendertype = new ArrayList<String>();
+    boolean data_back_gendertype;
+    String title_gendertype[];
+    String gendertype_name,gendertype_id,selected_gendertype_name,selected_gendertype_id;
+
     //Second Interface
     Spinner spn_account_type,spn_lock_mode,spn_gendertypes;
     EditText edt_target_amount,edt_payee_account,edt_ref;
@@ -86,11 +98,14 @@ public class Customer_Registration extends Activity {
 
         setContentView(R.layout.activity_customer_registration);
 
+        registration_account_list = new ArrayList<String>();
+        account_list = new JSONObject();
+
         customer_static_data = (RelativeLayout) findViewById(R.id.wrapping_panel1);
         account_configs = (RelativeLayout) findViewById(R.id.wrapping_panel2);
 
-        txt_dateofdate = (TextView) findViewById(R.id.txt_dateofbirth);
-        txt_dateofdate.setOnClickListener(new View.OnClickListener() {
+        txt_dateofbirth = (TextView) findViewById(R.id.txt_dateofbirth);
+        txt_dateofbirth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Calendar cal = Calendar.getInstance();
@@ -113,7 +128,7 @@ public class Customer_Registration extends Activity {
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                 month = month + 1;
                 String date = month + "/" + day + "/" + year;
-                txt_dateofdate.setText(date);
+                txt_dateofbirth.setText(date);
             }
         };
 
@@ -122,6 +137,12 @@ public class Customer_Registration extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //Get selected item and ID
+                try {
+                    phonecountry_selected = (String) title[position];
+                    phonecountry_id = list1.get(position);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -140,8 +161,12 @@ public class Customer_Registration extends Activity {
         spn_document_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected_document_type_name = (String) title2[position];
-                selected_document_type_id = list3.get(position);
+                try {
+                    selected_document_type_name = (String) title2[position];
+                    selected_document_type_id = list3.get(position);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -196,8 +221,12 @@ public class Customer_Registration extends Activity {
         spn_account_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected_account_name = (String) title3[position];
-                selected_account_id = list5.get(position);
+                try {
+                    selected_account_name = (String) title3[position];
+                    selected_account_id = list5.get(position);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -209,7 +238,12 @@ public class Customer_Registration extends Activity {
         spn_gendertypes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+                try {
+                    selected_gendertype_name = (String) title_gendertype[position];
+                    selected_gendertype_id = list2_gendertype.get(position);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -221,8 +255,12 @@ public class Customer_Registration extends Activity {
         spn_lock_mode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected_timeschdule_name = (String) title_timeschedule[position];
-                selected_timeschdule_id = list2_timeschedule.get(position);
+                try {
+                    selected_timeschdule_name = (String) title_timeschedule[position];
+                    selected_timeschdule_id = list2_timeschedule.get(position);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -232,10 +270,48 @@ public class Customer_Registration extends Activity {
         });
         edt_target_amount = (EditText) findViewById(R.id.edt_target_amount);
         txt_date_of_maturity = (TextView) findViewById(R.id.txt_date_of_maturity);
+        txt_date_of_maturity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar cal = Calendar.getInstance();
+                int year = cal.get(Calendar.YEAR);
+                int month = cal.get(Calendar.MONTH);
+                int day = cal.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog dialog = new DatePickerDialog(
+                        Customer_Registration.this,
+                        android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                        mDateSetListener_maturitydate,
+                        year,month,day);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.show();
+            }
+        });
+
+        mDateSetListener_maturitydate = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                month = month + 1;
+                String date = month + "/" + day + "/" + year;
+                txt_date_of_maturity.setText(date);
+            }
+        };
         btn_update_details = (Button) findViewById(R.id.btn_update_details);
         btn_update_details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
+                    account_list.put("AccountTypeId",selected_account_id);
+                    account_list.put("AccountTypeName",selected_account_name);
+                    account_list.put("AccountTargetAmount",edt_target_amount.getText().toString());
+                    account_list.put("AccountTargetTimeScheduleId",selected_timeschdule_id);
+                    account_list.put("TimeScheduleName",selected_timeschdule_name);
+                    account_list.put("FirstMaturityDate",txt_date_of_maturity.getText().toString());
+
+                    registration_account_list.add(account_list.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
         });
@@ -243,6 +319,7 @@ public class Customer_Registration extends Activity {
         btnsave_details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Save all the details provided
 
             }
         });
@@ -309,12 +386,12 @@ public class Customer_Registration extends Activity {
                         for (int i = 0; i < Documenttypes.length(); i++) {
                             JSONObject verifyresult2 = Documenttypes.getJSONObject(i);
 
-                            document_type_name = verifyresult2.getString("Name");
-                            document_type_id = verifyresult2.getString("Id");
+                            country_name = verifyresult2.getString("Name");
+                            country_id = verifyresult2.getString("Id");
 
                             data_back = true;
-                            list.add(document_type_name);
-                            list1.add(document_type_id);
+                            list.add(country_name);
+                            list1.add(country_id);
                         }
 
                         //Read the list
@@ -986,6 +1063,279 @@ public class Customer_Registration extends Activity {
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
                 return;
+            }
+        }
+    }
+
+    private class GetGenderTypes extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetGenderType";
+            JSONObject object1;
+
+            object1 = new JSONObject();
+
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray timeschdule_list = JsonResultVeriy.getJSONArray("Result");
+                    int tr = timeschdule_list.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < timeschdule_list.length(); i++) {
+                            JSONObject verifyresult2 = timeschdule_list.getJSONObject(i);
+
+                            gendertype_name = verifyresult2.getString("Name");
+                            gendertype_id = verifyresult2.getString("Id");
+
+                            data_back_gendertype = true;
+                            list_gendertype.add(gendertype_name);
+                            list2_gendertype.add(gendertype_id);
+                        }
+
+                        //Read the list
+                        if (list_gendertype.size() <= 0) {
+                            //Throw Error. No Record Found
+                            data_back_gendertype = false;
+                            Message msg = mhandler.obtainMessage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting time schedule. Please consult system admin.");
+                            msg.setData(bundle);
+                            msg.what = 2;
+                            mhandler.sendMessage(msg);
+                        } else {
+                            //Convert list to array
+                            title_gendertype = list_gendertype.toArray(new String[list_gendertype.size()]);
+                            data_back_gendertype = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        data_back_gendertype = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "No records returned from server while getting time schedules.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                } else {
+                    data_back_gendertype = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                data_back_gendertype = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
+            if (data_back_gendertype) {
+                //Load Data to Interface
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_gendertypes.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+            }else{
+                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
+                return;
+            }
+        }
+    }
+
+    private class SaveCustomerDetails extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Saving Client Details...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"//Agent/Registration/RegisterAgent/Add";
+            JSONObject object1;
+            JSONArray object2;
+            object1 = new JSONObject();
+            object2 = new JSONArray();
+
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                object1.put("NationalId",edt_document_type_id);
+                object1.put("Phone",edt_phonenumber);
+                object1.put("Name",Edt_Customername.getText().toString());
+                object1.put("DateofBirth",txt_dateofbirth);
+                object1.put("GenderTypeId",selected_gendertype_id);
+                object1.put("DocumentTypeId",selected_document_type_id);
+                object1.put("PhoneCountryCodeId",phonecountry_selected);
+                object1.put("PhysicalAddress",edt_physical_location.getText().toString());
+
+                object2.put(registration_account_list);
+                object1.put("AgencyRegistrationClientAccount",object2);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    data_back_registartion = true;
+
+                } else {
+                    data_back_registartion = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                e.printStackTrace();
+                data_back_registartion = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if (data_back_registartion){
+
+            }else {
+
             }
         }
     }

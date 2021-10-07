@@ -151,7 +151,6 @@ public class Customer_Registration extends Activity {
             }
         });
 
-
         edt_phonenumber = (EditText) findViewById(R.id.edt_phonenumber);
 
         Edt_Customername = (EditText) findViewById(R.id.Edt_Customername);
@@ -176,6 +175,24 @@ public class Customer_Registration extends Activity {
         });
 
         edt_document_type_id = (EditText) findViewById(R.id.edt_document_type_id);
+
+        spn_gendertypes = (Spinner) findViewById(R.id.spn_gendertypes);
+        spn_gendertypes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    selected_gendertype_name = (String) title_gendertype[position];
+                    selected_gendertype_id = list2_gendertype.get(position);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         btn_next = (Button) findViewById(R.id.btn_next);
         btn_next.setOnClickListener(new View.OnClickListener() {
@@ -234,23 +251,7 @@ public class Customer_Registration extends Activity {
 
             }
         });
-        spn_gendertypes = (Spinner) findViewById(R.id.spn_gendertypes);
-        spn_gendertypes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                try {
-                    selected_gendertype_name = (String) title_gendertype[position];
-                    selected_gendertype_id = list2_gendertype.get(position);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
         spn_lock_mode = (Spinner) findViewById(R.id.spn_lock_mode);
         spn_lock_mode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -326,164 +327,6 @@ public class Customer_Registration extends Activity {
     }
 
     //Async task
-    private class GetPhoneCountryCodes extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pDialog;
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(Customer_Registration.this);
-            pDialog.setMessage("Loading Data...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetCountryCode";
-            JSONObject object1;
-            object1 = new JSONObject();
-            URL url = null;
-            try {
-                url = new URL(serviceurl);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            try {
-                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-                writer.write(object1.toString());
-                writer.flush();
-                writer.close();
-                out.close();
-
-                conn.connect();
-
-                //display what returns the POST request
-                StringBuilder sb = new StringBuilder();
-                int HttpResult = conn.getResponseCode();
-                if (HttpResult == HttpURLConnection.HTTP_OK) {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    br.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-                    JSONArray Documenttypes = JsonResultVeriy.getJSONArray("Result");
-                    int tr = Documenttypes.length();
-                    if (tr >= 1) {
-                        for (int i = 0; i < Documenttypes.length(); i++) {
-                            JSONObject verifyresult2 = Documenttypes.getJSONObject(i);
-
-                            country_name = verifyresult2.getString("Name");
-                            country_id = verifyresult2.getString("Id");
-
-                            data_back = true;
-                            list.add(country_name);
-                            list1.add(country_id);
-                        }
-
-                        //Read the list
-                        if (list.size() <= 0) {
-                            //Throw Error. No Record Found
-                            data_back = false;
-                            Message msg = mhandler.obtainMessage();
-                            Bundle bundle = new Bundle();
-                            bundle.putString("MSG_KEY", "No data returned from the server while getting document types. Please consult system admin.");
-                            msg.setData(bundle);
-                            msg.what = 2;
-                            mhandler.sendMessage(msg);
-                        } else {
-                            //Convert list to array
-                            title = list.toArray(new String[list.size()]);
-                            data_back = true;
-                        }
-                    }else{
-                        //Throw Error. No Record Found
-                        if(pDialog.isShowing()){
-                            pDialog.dismiss();
-                        }
-                        data_back = false;
-                        Message msg = mhandler.obtainMessage();
-                        Bundle bundle = new Bundle();
-                        bundle.putString("MSG_KEY", "No records returned from server while getting document types.");
-                        msg.setData(bundle);
-                        msg.what = 2;
-                        mhandler.sendMessage(msg);
-                    }
-
-                } else {
-                    if(pDialog.isShowing()){
-                        pDialog.dismiss();
-                    }
-                    data_back = false;
-                    System.out.println("*****> " + conn.getErrorStream().toString());
-                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
-                    String line1 = null;
-                    while ((line1 = br1.readLine()) != null) {
-                        sb.append(line1 + "\n");
-                    }
-                    br1.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
-                    System.out.println("Message >>>>>>" + response_errormessage);
-                    Message msg1 = mhandler.obtainMessage();
-                    Bundle bundle1 = new Bundle();
-                    bundle1.putString("MSG_KEY", response_errormessage);
-                    msg1.setData(bundle1);
-                    msg1.what = 5;
-                    mhandler.sendMessage(msg1);
-                }
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-                if(pDialog.isShowing()){
-                    pDialog.dismiss();
-                }
-                data_back = false;
-                Message msg1 = mhandler.obtainMessage();
-                Bundle bundle1 = new Bundle();
-                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
-                msg1.setData(bundle1);
-                msg1.what = 5;
-                mhandler.sendMessage(msg1);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void file_url) {
-            if(pDialog.isShowing()){
-                pDialog.dismiss();
-            }
-            if (data_back) {
-                //Load Data to Interface
-                final ArrayAdapter<String> AccountsApapdter =
-                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
-                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                AccountsApapdter.notifyDataSetChanged();
-                spn_phonecountry.setAdapter(AccountsApapdter); // causes nullpointerexception
-
-            }else{
-                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
-                return;
-            }
-        }
-    }
-
     private class GetDocumentTypes extends AsyncTask<Void, Void, Void> {
         ProgressDialog pDialog;
         @Override
@@ -498,23 +341,13 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Employees/OfficerMembers/GetEntityDocumentType";
-            JSONObject object1,object2,object3;
-            JSONArray s;
-            s = new JSONArray();
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetDocumentType";
+            JSONObject object1;
             object1 = new JSONObject();
-            object2 = new JSONObject();
-            object3 = new JSONObject();
             URL url = null;
             try {
                 url = new URL(serviceurl);
             } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            try {
-                object1.put("take","10000");
-                object1.put("skip","0");
-            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
@@ -555,8 +388,8 @@ public class Customer_Registration extends Activity {
                         for (int i = 0; i < Documenttypes.length(); i++) {
                             JSONObject verifyresult2 = Documenttypes.getJSONObject(i);
 
-                            document_type_name = verifyresult2.getString("doc_name");
-                            document_type_id = verifyresult2.getString("id");
+                            document_type_name = verifyresult2.getString("Name");
+                            document_type_id = verifyresult2.getString("Id");
 
                             data_back2 = true;
                             list2.add(document_type_name);
@@ -642,13 +475,323 @@ public class Customer_Registration extends Activity {
         }
     }
 
+    private class GetPhoneCountryCodes extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetCountryCode";
+            JSONObject object1;
+            object1 = new JSONObject();
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray Phonecountrycodes = JsonResultVeriy.getJSONArray("Result");
+                    int tr = Phonecountrycodes.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < Phonecountrycodes.length(); i++) {
+                            JSONObject verifyresult2 = Phonecountrycodes.getJSONObject(i);
+
+                            country_name = verifyresult2.getString("Name");
+                            country_id = verifyresult2.getString("Id");
+
+                            data_back = true;
+                            list.add(country_name);
+                            list1.add(country_id);
+                        }
+
+                        //Read the list
+                        if (list.size() <= 0) {
+                            //Throw Error. No Record Found
+                            data_back = false;
+                            Message msg = mhandler.obtainMessage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting phone country codes. Please consult system admin.");
+                            msg.setData(bundle);
+                            msg.what = 2;
+                            mhandler.sendMessage(msg);
+                        } else {
+                            //Convert list to array
+                            title = list.toArray(new String[list.size()]);
+                            data_back = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        if(pDialog.isShowing()){
+                            pDialog.dismiss();
+                        }
+                        data_back = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "No records returned from server while getting Phone country codes.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                } else {
+                    if(pDialog.isShowing()){
+                        pDialog.dismiss();
+                    }
+                    data_back = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                if(pDialog.isShowing()){
+                    pDialog.dismiss();
+                }
+                data_back = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
+            if (data_back) {
+                //Load Data to Interface
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_phonecountry.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+            }else{
+                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
+                return;
+            }
+        }
+    }
+
+    private class GetGenderTypes extends AsyncTask<Void, Void, Void> {
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Data...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetGenderType";
+            JSONObject object1;
+
+            object1 = new JSONObject();
+
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream out = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                writer.write(object1.toString());
+                writer.flush();
+                writer.close();
+                out.close();
+
+                conn.connect();
+
+                //display what returns the POST request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray timeschdule_list = JsonResultVeriy.getJSONArray("Result");
+                    int tr = timeschdule_list.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < timeschdule_list.length(); i++) {
+                            JSONObject verifyresult2 = timeschdule_list.getJSONObject(i);
+
+                            gendertype_name = verifyresult2.getString("Name");
+                            gendertype_id = verifyresult2.getString("Id");
+
+                            data_back_gendertype = true;
+                            list_gendertype.add(gendertype_name);
+                            list2_gendertype.add(gendertype_id);
+                        }
+
+                        //Read the list
+                        if (list_gendertype.size() <= 0) {
+                            //Throw Error. No Record Found
+                            data_back_gendertype = false;
+                            Message msg = mhandler.obtainMessage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting time schedule. Please consult system admin.");
+                            msg.setData(bundle);
+                            msg.what = 2;
+                            mhandler.sendMessage(msg);
+                        } else {
+                            //Convert list to array
+                            title_gendertype = list_gendertype.toArray(new String[list_gendertype.size()]);
+                            data_back_gendertype = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        data_back_gendertype = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "No records returned from server while getting time schedules.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                } else {
+                    data_back_gendertype = false;
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = error_object.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                data_back_gendertype = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
+            if (data_back_gendertype) {
+                //Load Data to Interface
+                final ArrayAdapter<String> AccountsApapdter =
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                AccountsApapdter.notifyDataSetChanged();
+                spn_gendertypes.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+            }else{
+                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
+                return;
+            }
+        }
+    }
+
     private class CheckifIDexists extends AsyncTask<Void, Void, Void> {
         ProgressDialog pDialog;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(Customer_Registration.this);
-            pDialog.setMessage("Checking Identification Document...");
+            pDialog.setMessage("Checking if I.D. Exists...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
@@ -836,11 +979,11 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-                    JSONArray Documenttypes = JsonResultVeriy.getJSONArray("Result");
-                    int tr = Documenttypes.length();
+                    JSONArray CustomerAccounts = JsonResultVeriy.getJSONArray("Result");
+                    int tr = CustomerAccounts.length();
                     if (tr >= 1) {
-                        for (int i = 0; i < Documenttypes.length(); i++) {
-                            JSONObject verifyresult2 = Documenttypes.getJSONObject(i);
+                        for (int i = 0; i < CustomerAccounts.length(); i++) {
+                            JSONObject verifyresult2 = CustomerAccounts.getJSONObject(i);
 
                             AccountTypeName = verifyresult2.getString("AccountTypeName");
                             AccountTypeId = verifyresult2.getString("AccountTypeId");
@@ -856,7 +999,7 @@ public class Customer_Registration extends Activity {
                             data_back3 = false;
                             Message msg = mhandler.obtainMessage();
                             Bundle bundle = new Bundle();
-                            bundle.putString("MSG_KEY", "No data returned from the server while fetching stations. Please consult system admin.");
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting customer accounts. Please consult system admin.");
                             msg.setData(bundle);
                             msg.what = 2;
                             mhandler.sendMessage(msg);
@@ -870,7 +1013,7 @@ public class Customer_Registration extends Activity {
                         data_back3 = false;
                         Message msg = mhandler.obtainMessage();
                         Bundle bundle = new Bundle();
-                        bundle.putString("MSG_KEY", "No records returned from server while fetching user stations.");
+                        bundle.putString("MSG_KEY", "No records returned from server while getting customer accounts.");
                         msg.setData(bundle);
                         msg.what = 2;
                         mhandler.sendMessage(msg);
@@ -1072,158 +1215,6 @@ public class Customer_Registration extends Activity {
                 AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 AccountsApapdter.notifyDataSetChanged();
                 spn_lock_mode.setAdapter(AccountsApapdter); // causes nullpointerexception
-
-            }else{
-                //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
-                return;
-            }
-        }
-    }
-
-    private class GetGenderTypes extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pDialog;
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(Customer_Registration.this);
-            pDialog.setMessage("Loading Data...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetGenderType";
-            JSONObject object1;
-
-            object1 = new JSONObject();
-
-            URL url = null;
-            try {
-                url = new URL(serviceurl);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-                writer.write(object1.toString());
-                writer.flush();
-                writer.close();
-                out.close();
-
-                conn.connect();
-
-                //display what returns the POST request
-                StringBuilder sb = new StringBuilder();
-                int HttpResult = conn.getResponseCode();
-                if (HttpResult == HttpURLConnection.HTTP_OK) {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    br.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-                    JSONArray timeschdule_list = JsonResultVeriy.getJSONArray("Result");
-                    int tr = timeschdule_list.length();
-                    if (tr >= 1) {
-                        for (int i = 0; i < timeschdule_list.length(); i++) {
-                            JSONObject verifyresult2 = timeschdule_list.getJSONObject(i);
-
-                            gendertype_name = verifyresult2.getString("Name");
-                            gendertype_id = verifyresult2.getString("Id");
-
-                            data_back_gendertype = true;
-                            list_gendertype.add(gendertype_name);
-                            list2_gendertype.add(gendertype_id);
-                        }
-
-                        //Read the list
-                        if (list_gendertype.size() <= 0) {
-                            //Throw Error. No Record Found
-                            data_back_gendertype = false;
-                            Message msg = mhandler.obtainMessage();
-                            Bundle bundle = new Bundle();
-                            bundle.putString("MSG_KEY", "No data returned from the server while getting time schedule. Please consult system admin.");
-                            msg.setData(bundle);
-                            msg.what = 2;
-                            mhandler.sendMessage(msg);
-                        } else {
-                            //Convert list to array
-                            title_gendertype = list_gendertype.toArray(new String[list_gendertype.size()]);
-                            data_back_gendertype = true;
-                        }
-                    }else{
-                        //Throw Error. No Record Found
-                        data_back_gendertype = false;
-                        Message msg = mhandler.obtainMessage();
-                        Bundle bundle = new Bundle();
-                        bundle.putString("MSG_KEY", "No records returned from server while getting time schedules.");
-                        msg.setData(bundle);
-                        msg.what = 2;
-                        mhandler.sendMessage(msg);
-                    }
-
-                } else {
-                    data_back_gendertype = false;
-                    System.out.println("*****> " + conn.getErrorStream().toString());
-                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
-                    String line1 = null;
-                    while ((line1 = br1.readLine()) != null) {
-                        sb.append(line1 + "\n");
-                    }
-                    br1.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
-                    System.out.println("Message >>>>>>" + response_errormessage);
-                    Message msg1 = mhandler.obtainMessage();
-                    Bundle bundle1 = new Bundle();
-                    bundle1.putString("MSG_KEY", response_errormessage);
-                    msg1.setData(bundle1);
-                    msg1.what = 5;
-                    mhandler.sendMessage(msg1);
-                }
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-                data_back_gendertype = false;
-                Message msg1 = mhandler.obtainMessage();
-                Bundle bundle1 = new Bundle();
-                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
-                msg1.setData(bundle1);
-                msg1.what = 5;
-                mhandler.sendMessage(msg1);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void file_url) {
-            if(pDialog.isShowing()){
-                pDialog.dismiss();
-            }
-            if (data_back_gendertype) {
-                //Load Data to Interface
-                final ArrayAdapter<String> AccountsApapdter =
-                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
-                AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                AccountsApapdter.notifyDataSetChanged();
-                spn_gendertypes.setAdapter(AccountsApapdter); // causes nullpointerexception
 
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();

@@ -706,28 +706,41 @@ public class Customer_Registration extends Activity {
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
                     JSONArray check_id = JsonResultVeriy.getJSONArray("Result");
                     data_back2 = true;
-                } else {
-                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
-                    String line1 = null;
-                    while ((line1 = br1.readLine()) != null) {
-                        sb.append(line1 + "\n");
-                    }
-                    br1.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("TechnicalMessage");
-                    System.out.println("TechnicalMessage >>>>>>" + response_errormessage);
-                    if(response_errormessage.equalsIgnoreCase("NotFound")){
-                        data_back2 = false;
-                    }else{
-                        if(pDialog.isShowing()){
+                }
+                else {
+                    try {
+                        BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                        String line1 = null;
+                        while ((line1 = br1.readLine()) != null) {
+                            sb.append(line1 + "\n");
+                        }
+                        br1.close();
+                        System.out.println("ATEYA" + sb.toString());
+                        String JsonResult = sb.toString();
+                        JSONObject JsonResulterror = new JSONObject(JsonResult);
+                        JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                        String response_errormessage = error_object.getString("TechnicalMessage");
+                        System.out.println("TechnicalMessage >>>>>>" + response_errormessage);
+                        if (response_errormessage.equalsIgnoreCase("NotFound")) {
+                            data_back2 = false;
+                        } else {
+                            if (pDialog.isShowing()) {
+                                pDialog.dismiss();
+                            }
+                            Message msg1 = mhandler.obtainMessage();
+                            Bundle bundle1 = new Bundle();
+                            bundle1.putString("MSG_KEY", response_errormessage);
+                            msg1.setData(bundle1);
+                            msg1.what = 5;
+                            mhandler.sendMessage(msg1);
+                        }
+                    }catch (Exception e){
+                        if (pDialog.isShowing()) {
                             pDialog.dismiss();
                         }
                         Message msg1 = mhandler.obtainMessage();
                         Bundle bundle1 = new Bundle();
-                        bundle1.putString("MSG_KEY", response_errormessage);
+                        bundle1.putString("MSG_KEY", e.toString());
                         msg1.setData(bundle1);
                         msg1.what = 5;
                         mhandler.sendMessage(msg1);
@@ -750,6 +763,9 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
             if (data_back2) {
                 Message msg1 = mhandler.obtainMessage();
                 Bundle bundle1 = new Bundle();
@@ -758,9 +774,6 @@ public class Customer_Registration extends Activity {
                 msg1.what = 5;
                 mhandler.sendMessage(msg1);
             }else{
-                if(pDialog.isShowing()){
-                    pDialog.dismiss();
-                }
                 customer_static_data.setVisibility(View.GONE);
                 account_configs.setVisibility(View.VISIBLE);
                 account_configuration = true;
@@ -1387,6 +1400,9 @@ public class Customer_Registration extends Activity {
                                 @Override
                                 public void onClick(SweetAlertDialog sDialog) {
                                     sDialog.dismissWithAnimation();
+                                    Intent i = new Intent(Customer_Registration.this, MainActivity.class);
+                                    startActivity(i);
+                                    Customer_Registration.this.finish();
                                 }
                             }).
                             show();

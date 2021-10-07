@@ -94,7 +94,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     private String client_name,phone_no,member_no;
     private String account_name,account_no;
     String selected_account_name,selected_account_no;
-    ArrayList<String> allocations;
+    JSONArray allocations;
     JSONObject collected_data;
     ArrayList<String> total_amount = new ArrayList<String>();
     StringBuffer sbitems = new StringBuffer();
@@ -134,7 +134,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         printerdevice = mBluetoothAdapter.getRemoteDevice(currentprinter);
 
         collected_data = new JSONObject();
-        allocations = new ArrayList<String>();
+        allocations = new JSONArray();
 
         edt_amount = (EditText) findViewById(R.id.edt_amount);
         edadditems = (EditText) findViewById(R.id.edadditems);
@@ -192,7 +192,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 try {
                     collected_data.put("account_no",selected_account_no);
                     collected_data.put("amount",edt_amount.getText().toString());
-                    allocations.add(collected_data.toString());
+                    allocations.put(collected_data);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -869,8 +869,6 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             JSONObject object1;
             JSONArray object2;
             object1 = new JSONObject();
-            object2 = new JSONArray();
-
             URL url = null;
             try {
                 url = new URL(serviceurl);
@@ -881,8 +879,8 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 object1.put("client_no",member_no);
                 object1.put("agent_no","0");
                 object1.put("amount",totalC);
-                object2.put(allocations);
-                object1.put("allocations",object2);
+                //object2.put(allocations);
+                object1.put("allocations",allocations);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -959,7 +957,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         @Override
         protected void onPostExecute(Void file_url) {
             collected_data = new JSONObject();
-            allocations.clear();
+            allocations = new JSONArray();
             total_amount.clear();
             totalC = 0.0;
             edt_amount.setText("");

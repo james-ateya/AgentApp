@@ -36,6 +36,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -48,9 +49,10 @@ public class Customer_Registration extends Activity {
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private DatePickerDialog.OnDateSetListener mDateSetListener_maturitydate;
     RelativeLayout customer_static_data,account_configs;
-    ArrayList<String> registration_account_list;
+    JSONArray registration_account_list;
     JSONObject account_list;
     boolean data_back_registartion;
+    ArrayList<String> readings = new ArrayList<String>();
 
 
 
@@ -91,6 +93,7 @@ public class Customer_Registration extends Activity {
     TextView txt_date_of_maturity;
     Button btn_update_details,btnsave_details,btn_next;
     boolean account_configuration = false;
+    boolean module_back = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +101,7 @@ public class Customer_Registration extends Activity {
 
         setContentView(R.layout.activity_customer_registration);
 
-        registration_account_list = new ArrayList<String>();
+        registration_account_list = new JSONArray();
         account_list = new JSONObject();
 
         customer_static_data = (RelativeLayout) findViewById(R.id.wrapping_panel1);
@@ -126,9 +129,13 @@ public class Customer_Registration extends Activity {
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                month = month + 1;
-                String date = month + "/" + day + "/" + year;
-                txt_dateofbirth.setText(date);
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, month, day);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                String dateString = dateFormat.format(calendar.getTime());
+                //month = month + 1;
+                //String date = month + "/" + day + "/" + year;
+                txt_dateofbirth.setText(dateString);
             }
         };
 
@@ -198,12 +205,44 @@ public class Customer_Registration extends Activity {
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            //Check if suppied ID exists
-                CheckifIDexists check = new CheckifIDexists();
-                check.execute();
+                //Check if suppied ID exists
+                if (getnetwork_state()) {
+                    if (!module_back) {
+                        CheckifIDexists check = new CheckifIDexists();
+                        check.execute();
+                    } else {
+                        customer_static_data.setVisibility(View.GONE);
+                        account_configs.setVisibility(View.VISIBLE);
+                        account_configuration = true;
+                        module_back = false;
+                    }
+                }else {
+                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                            setTitleText("Internet Disconnected").
+                            setContentText("Please check your internet connection and try again.").show();
+                    return;
+                }
             }
         });
         second_interface_config();
+
+        if(getnetwork_state()){
+            GetDocumentTypes getdocumenttypes = new GetDocumentTypes();
+            getdocumenttypes.execute();
+        }else{
+            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                    setTitleText("Internet Failure!").setContentText("Please check your internet connection").
+                    setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            Intent main = new Intent(getApplicationContext(),MainActivity.class);
+                            startActivity(main);
+                            Customer_Registration.this.finish();
+                        }
+                    }).
+                    show();
+        }
     }
 
     @Override
@@ -213,6 +252,7 @@ public class Customer_Registration extends Activity {
             customer_static_data.setVisibility(View.VISIBLE);
             account_configs.setVisibility(View.GONE);
             account_configuration = false;
+            module_back = true;
         }else{
             super.onBackPressed();
             Intent i = new Intent(Customer_Registration.this, MainActivity.class);
@@ -231,6 +271,7 @@ public class Customer_Registration extends Activity {
         customer_static_data.setVisibility(View.VISIBLE);
         account_configs.setVisibility(View.GONE);
         account_configuration = false;
+        module_back = true;
     }
 
     void second_interface_config(){
@@ -292,9 +333,13 @@ public class Customer_Registration extends Activity {
         mDateSetListener_maturitydate = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                month = month + 1;
-                String date = month + "/" + day + "/" + year;
-                txt_date_of_maturity.setText(date);
+                //month = month + 1;
+                //String date = month + "/" + day + "/" + year;
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, month, day);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                String dateString = dateFormat.format(calendar.getTime());
+                txt_date_of_maturity.setText(dateString);
             }
         };
         btn_update_details = (Button) findViewById(R.id.btn_update_details);
@@ -302,14 +347,43 @@ public class Customer_Registration extends Activity {
             @Override
             public void onClick(View v) {
                 try {
-                    account_list.put("AccountTypeId",selected_account_id);
-                    account_list.put("AccountTypeName",selected_account_name);
-                    account_list.put("AccountTargetAmount",edt_target_amount.getText().toString());
-                    account_list.put("AccountTargetTimeScheduleId",selected_timeschdule_id);
-                    account_list.put("TimeScheduleName",selected_timeschdule_name);
-                    account_list.put("FirstMaturityDate",txt_date_of_maturity.getText().toString());
+                    if(readings.isEmpty()){
+                        readings.add(selected_account_name);
+                        account_list.put("AccountTypeId",selected_account_id);
+                        account_list.put("AccountTypeName",selected_account_name);
+                        account_list.put("AccountTargetAmount",edt_target_amount.getText().toString());
+                        account_list.put("AccountTargetTimeScheduleId",selected_timeschdule_id);
+                        account_list.put("TimeScheduleName",selected_timeschdule_name);
+                        account_list.put("FirstMaturityDate",txt_date_of_maturity.getText().toString());
 
-                    registration_account_list.add(account_list.toString());
+                        registration_account_list.put(account_list);
+
+                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
+                                setTitleText("UPDATED").
+                                setContentText("Account Details updated successfully.").show();
+                    }
+                    else if(readings.contains(selected_account_name)){
+                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
+                                setTitleText("Duplicate Account").
+                                setContentText(selected_account_name + " Has Already Been Configured.").show();
+                        return;
+                    }
+                    else{
+                        readings.add(selected_account_name);
+                        account_list.put("AccountTypeId",selected_account_id);
+                        account_list.put("AccountTypeName",selected_account_name);
+                        account_list.put("AccountTargetAmount",edt_target_amount.getText().toString());
+                        account_list.put("AccountTargetTimeScheduleId",selected_timeschdule_id);
+                        account_list.put("TimeScheduleName",selected_timeschdule_name);
+                        account_list.put("FirstMaturityDate",txt_date_of_maturity.getText().toString());
+
+                        registration_account_list.put(account_list);
+
+                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
+                                setTitleText("UPDATED").
+                                setContentText("Account Details updated successfully.").show();
+                        return;
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -321,6 +395,15 @@ public class Customer_Registration extends Activity {
             @Override
             public void onClick(View v) {
                 //Save all the details provided
+                if(getnetwork_state()){
+                    SaveCustomerDetails savedetails = new SaveCustomerDetails();
+                    savedetails.execute();
+                }else{
+                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                            setTitleText("Internet Disconnected").
+                            setContentText("Please check your internet connection and try again.").show();
+                    return;
+                }
 
             }
         });
@@ -341,7 +424,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetDocumentType";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetDocumentType";
             JSONObject object1;
             object1 = new JSONObject();
             URL url = null;
@@ -353,19 +436,22 @@ public class Customer_Registration extends Activity {
 
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestMethod("GET");
+                //conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("Authorization", GlobalVariables.session_token);
                 conn.setDoInput(true);
-                conn.setDoOutput(true);
+                conn.setDoOutput(false);
 
+                /*
                 OutputStream out = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
                 writer.write(object1.toString());
                 writer.flush();
                 writer.close();
                 out.close();
+
+                 */
 
                 conn.connect();
 
@@ -402,9 +488,9 @@ public class Customer_Registration extends Activity {
                             data_back2 = false;
                             Message msg = mhandler.obtainMessage();
                             Bundle bundle = new Bundle();
-                            bundle.putString("MSG_KEY", "No data returned from the server while fetching stations. Please consult system admin.");
+                            bundle.putString("MSG_KEY", "No data returned from the server while getting document types. Please consult system admin.");
                             msg.setData(bundle);
-                            msg.what = 2;
+                            msg.what = 6;
                             mhandler.sendMessage(msg);
                         } else {
                             //Convert list to array
@@ -416,13 +502,14 @@ public class Customer_Registration extends Activity {
                         data_back2 = false;
                         Message msg = mhandler.obtainMessage();
                         Bundle bundle = new Bundle();
-                        bundle.putString("MSG_KEY", "No records returned from server while fetching user stations.");
+                        bundle.putString("MSG_KEY", "No records returned from server while fetching getting documrnt types.");
                         msg.setData(bundle);
-                        msg.what = 2;
+                        msg.what = 6;
                         mhandler.sendMessage(msg);
                     }
 
-                } else {
+                }
+                else {
                     data_back2 = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -434,14 +521,14 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
                     System.out.println("Message >>>>>>" + response_errormessage);
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
                     bundle1.putString("MSG_KEY", response_errormessage);
                     msg1.setData(bundle1);
-                    msg1.what = 5;
+                    msg1.what = 6;
                     mhandler.sendMessage(msg1);
                 }
             } catch (IOException | JSONException e) {
@@ -452,7 +539,7 @@ public class Customer_Registration extends Activity {
                 Bundle bundle1 = new Bundle();
                 bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
                 msg1.setData(bundle1);
-                msg1.what = 5;
+                msg1.what = 6;
                 mhandler.sendMessage(msg1);
             }
             return null;
@@ -460,13 +547,19 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
             if (data_back2) {
                 //Load Data to Interface
                 final ArrayAdapter<String> AccountsApapdter =
-                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title2);
                 AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 AccountsApapdter.notifyDataSetChanged();
                 spn_document_type.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+                GetPhoneCountryCodes phonecountrycodes = new GetPhoneCountryCodes();
+                phonecountrycodes.execute();
 
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
@@ -489,7 +582,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetCountryCode";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetCountryCode";
             JSONObject object1;
             object1 = new JSONObject();
             URL url = null;
@@ -500,19 +593,21 @@ public class Customer_Registration extends Activity {
             }
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestMethod("GET");
+                //conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("Authorization", GlobalVariables.session_token);
                 conn.setDoInput(true);
-                conn.setDoOutput(true);
-
+                conn.setDoOutput(false);
+                /*
                 OutputStream out = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
                 writer.write(object1.toString());
                 writer.flush();
                 writer.close();
                 out.close();
+
+                 */
 
                 conn.connect();
 
@@ -572,7 +667,8 @@ public class Customer_Registration extends Activity {
                         mhandler.sendMessage(msg);
                     }
 
-                } else {
+                }
+                else {
                     if(pDialog.isShowing()){
                         pDialog.dismiss();
                     }
@@ -587,8 +683,8 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
                     System.out.println("Message >>>>>>" + response_errormessage);
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
@@ -626,6 +722,9 @@ public class Customer_Registration extends Activity {
                 AccountsApapdter.notifyDataSetChanged();
                 spn_phonecountry.setAdapter(AccountsApapdter); // causes nullpointerexception
 
+                GetGenderTypes getgendertypes = new GetGenderTypes();
+                getgendertypes.execute();
+
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
                 return;
@@ -647,7 +746,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetGenderType";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetGenderType";
             JSONObject object1;
 
             object1 = new JSONObject();
@@ -661,19 +760,12 @@ public class Customer_Registration extends Activity {
 
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestMethod("GET");
+                //conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("Authorization", GlobalVariables.session_token);
                 conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-                writer.write(object1.toString());
-                writer.flush();
-                writer.close();
-                out.close();
+                conn.setDoOutput(false);
 
                 conn.connect();
 
@@ -730,7 +822,8 @@ public class Customer_Registration extends Activity {
                         mhandler.sendMessage(msg);
                     }
 
-                } else {
+                }
+                else {
                     data_back_gendertype = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -742,8 +835,8 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
                     System.out.println("Message >>>>>>" + response_errormessage);
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
@@ -773,10 +866,13 @@ public class Customer_Registration extends Activity {
             if (data_back_gendertype) {
                 //Load Data to Interface
                 final ArrayAdapter<String> AccountsApapdter =
-                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title_gendertype);
                 AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 AccountsApapdter.notifyDataSetChanged();
                 spn_gendertypes.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+                GetDefaultCustomerAccounts getcustomeraccounts = new GetDefaultCustomerAccounts();
+                getcustomeraccounts.execute();
 
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
@@ -799,7 +895,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GenerateAgentDetailsFromNatId";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GenerateAgentDetailsFromNatId";
             JSONObject object1;
             object1 = new JSONObject();
 
@@ -846,8 +942,8 @@ public class Customer_Registration extends Activity {
                     br.close();
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
-                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-                    JSONArray check_id = JsonResultVeriy.getJSONArray("Result");
+                    //JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    //JSONArray check_id = JsonResultVeriy.getJSONArray("Result");
                     data_back2 = true;
                 }
                 else {
@@ -861,8 +957,8 @@ public class Customer_Registration extends Activity {
                         System.out.println("ATEYA" + sb.toString());
                         String JsonResult = sb.toString();
                         JSONObject JsonResulterror = new JSONObject(JsonResult);
-                        JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                        String response_errormessage = error_object.getString("TechnicalMessage");
+                        //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                        String response_errormessage = JsonResulterror.getString("TechnicalMessage");
                         System.out.println("TechnicalMessage >>>>>>" + response_errormessage);
                         if (response_errormessage.equalsIgnoreCase("NotFound")) {
                             data_back2 = false;
@@ -874,7 +970,7 @@ public class Customer_Registration extends Activity {
                             Bundle bundle1 = new Bundle();
                             bundle1.putString("MSG_KEY", response_errormessage);
                             msg1.setData(bundle1);
-                            msg1.what = 5;
+                            msg1.what = 6;
                             mhandler.sendMessage(msg1);
                         }
                     }catch (Exception e){
@@ -885,11 +981,11 @@ public class Customer_Registration extends Activity {
                         Bundle bundle1 = new Bundle();
                         bundle1.putString("MSG_KEY", e.toString());
                         msg1.setData(bundle1);
-                        msg1.what = 5;
+                        msg1.what = 6;
                         mhandler.sendMessage(msg1);
                     }
                 }
-            } catch (IOException | JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 if(pDialog.isShowing()){
                     pDialog.dismiss();
@@ -898,7 +994,7 @@ public class Customer_Registration extends Activity {
                 Bundle bundle1 = new Bundle();
                 bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
                 msg1.setData(bundle1);
-                msg1.what = 5;
+                msg1.what = 6;
                 mhandler.sendMessage(msg1);
             }
             return null;
@@ -914,7 +1010,7 @@ public class Customer_Registration extends Activity {
                 Bundle bundle1 = new Bundle();
                 bundle1.putString("MSG_KEY", "The Customer is already registered, use his/her ID Number as account number.");
                 msg1.setData(bundle1);
-                msg1.what = 5;
+                msg1.what = 6;
                 mhandler.sendMessage(msg1);
             }else{
                 customer_static_data.setVisibility(View.GONE);
@@ -938,7 +1034,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetDefaultAccounts";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetDefaultAccounts";
             JSONObject object1;
             object1 = new JSONObject();
             URL url = null;
@@ -950,19 +1046,12 @@ public class Customer_Registration extends Activity {
 
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestMethod("GET");
+                //conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("Authorization", GlobalVariables.session_token);
                 conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-                writer.write(object1.toString());
-                writer.flush();
-                writer.close();
-                out.close();
+                conn.setDoOutput(false);
 
                 conn.connect();
 
@@ -1019,7 +1108,8 @@ public class Customer_Registration extends Activity {
                         mhandler.sendMessage(msg);
                     }
 
-                } else {
+                }
+                else {
                     data_back3 = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -1056,13 +1146,19 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
             if (data_back3) {
                 //Load Data to Interface
                 final ArrayAdapter<String> AccountsApapdter =
-                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title3);
                 AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 AccountsApapdter.notifyDataSetChanged();
                 spn_account_type.setAdapter(AccountsApapdter); // causes nullpointerexception
+
+                GetTimeSchedule gettimeshedule = new GetTimeSchedule();
+                gettimeshedule.execute();
 
             }else{
                 //new SweetAlertDialog(Inventory_Register.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO DATA").setContentText("There seems to be an issue, please contact system admin.").show();
@@ -1085,7 +1181,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/GetTimeSchedule";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetTimeSchedule";
             JSONObject object1;
 
             object1 = new JSONObject();
@@ -1099,19 +1195,12 @@ public class Customer_Registration extends Activity {
 
             try {
                 HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestMethod("GET");
+                //conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("Authorization", GlobalVariables.session_token);
                 conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-                writer.write(object1.toString());
-                writer.flush();
-                writer.close();
-                out.close();
+                conn.setDoOutput(false);
 
                 conn.connect();
 
@@ -1211,7 +1300,7 @@ public class Customer_Registration extends Activity {
             if (data_back_timeschdule) {
                 //Load Data to Interface
                 final ArrayAdapter<String> AccountsApapdter =
-                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title);
+                        new ArrayAdapter<String>(Customer_Registration.this, android.R.layout.simple_list_item_1, title_timeschedule);
                 AccountsApapdter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 AccountsApapdter.notifyDataSetChanged();
                 spn_lock_mode.setAdapter(AccountsApapdter); // causes nullpointerexception
@@ -1237,7 +1326,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/Add";
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/Add";
             JSONObject object1;
             JSONArray object2;
             object1 = new JSONObject();
@@ -1250,17 +1339,16 @@ public class Customer_Registration extends Activity {
                 e.printStackTrace();
             }
             try {
-                object1.put("NationalId",edt_document_type_id);
-                object1.put("Phone",edt_phonenumber);
+                object1.put("NationalId",edt_document_type_id.getText().toString());
+                object1.put("Phone",edt_phonenumber.getText().toString());
                 object1.put("Name",Edt_Customername.getText().toString());
-                object1.put("DateofBirth",txt_dateofbirth);
+                object1.put("DateofBirth",txt_dateofbirth.getText().toString());
                 object1.put("GenderTypeId",selected_gendertype_id);
                 object1.put("DocumentTypeId",selected_document_type_id);
-                object1.put("PhoneCountryCodeId",phonecountry_selected);
+                object1.put("PhoneCountryCodeId",phonecountry_id);
                 object1.put("PhysicalAddress",edt_physical_location.getText().toString());
+                object1.put("AgencyRegistrationClientAccount",registration_account_list);
 
-                object2.put(registration_account_list);
-                object1.put("AgencyRegistrationClientAccount",object2);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1295,7 +1383,7 @@ public class Customer_Registration extends Activity {
                     br.close();
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
-                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    //JSONObject JsonResultVeriy = new JSONObject(JsonResult);
                     data_back_registartion = true;
 
                 } else {
@@ -1310,8 +1398,8 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
                     System.out.println("Message >>>>>>" + response_errormessage);
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
@@ -1336,10 +1424,35 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
             if (data_back_registartion){
+                edt_target_amount.setText("");
+                txt_date_of_maturity.setText("");
+                selected_account_id = null;
+                selected_account_name = null;
+                selected_timeschdule_id = null;
+                selected_timeschdule_name = null;
+                edt_document_type_id.setText("");
+                edt_phonenumber.setText("");
+                Edt_Customername.setText("");
+                txt_dateofbirth.setText("");
+                edt_physical_location.setText("");
+                selected_gendertype_id = null;
+                selected_document_type_id = null;
+                phonecountry_selected = null;
+                registration_account_list = new JSONArray();
+                readings.clear();
 
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "Client Registered Successfully.");
+                msg1.setData(bundle1);
+                msg1.what = 4;
+                mhandler.sendMessage(msg1);
             }else {
-
+                return;
             }
         }
     }
@@ -1376,6 +1489,9 @@ public class Customer_Registration extends Activity {
                                 @Override
                                 public void onClick(SweetAlertDialog sDialog) {
                                     sDialog.dismissWithAnimation();
+                                    Intent i = new Intent(Customer_Registration.this, MainActivity.class);
+                                    startActivity(i);
+                                    Customer_Registration.this.finish();
                                 }
                             }).
                             show();
@@ -1391,9 +1507,7 @@ public class Customer_Registration extends Activity {
                                 @Override
                                 public void onClick(SweetAlertDialog sDialog) {
                                     sDialog.dismissWithAnimation();
-                                    Intent i = new Intent(Customer_Registration.this, MainActivity.class);
-                                    startActivity(i);
-                                    Customer_Registration.this.finish();
+                                    return;
                                 }
                             }).
                             show();
@@ -1403,8 +1517,8 @@ public class Customer_Registration extends Activity {
                 case 6:
                     Bundle bundle6 = msg.getData();
                     String string6 = bundle6.getString("MSG_KEY");
-                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
-                            setTitleText("SUCCESS!").setContentText(string6).
+                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
+                            setTitleText("SORRY!").setContentText(string6).
                             setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                                 @Override
                                 public void onClick(SweetAlertDialog sDialog) {

@@ -116,11 +116,12 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
                     GlobalVariables.username=edt_username.getText().toString();
                     GlobalVariables.password=edt_password.getText().toString();
 
-                    Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(confirm);
-                    LoginActivity.this.finish();
-                    //login_User login = new login_User();
-                    //login.execute();
+                    //Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
+                    //startActivity(confirm);
+                    //LoginActivity.this.finish();
+
+                    login_User login = new login_User();
+                    login.execute();
 
                     //Intent a = new Intent(LoginActivity.this, APK_Update.class);
                     //startActivity(a);
@@ -227,8 +228,6 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
                     JSONObject jresponse = JsonResultVeriy.getJSONObject("Result");
                     String response_message = jresponse.getString("Message");
-
-                    JSONObject jresponse3 = jresponse.getJSONObject("Result");
 
                     Message msg = mhandler.obtainMessage();
                     Bundle bundle = new Bundle();

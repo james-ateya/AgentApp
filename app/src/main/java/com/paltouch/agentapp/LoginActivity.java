@@ -70,6 +70,7 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        permissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
 
         permissionUtils.check_permission(permissions,"Needed Permissions",1);
 
@@ -115,14 +116,14 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
                     GlobalVariables.username=edt_username.getText().toString();
                     GlobalVariables.password=edt_password.getText().toString();
 
-                    Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(confirm);
+                    //Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
+                    //startActivity(confirm);
                     //LoginActivity.this.finish();
                     //login_User login = new login_User();
                     //login.execute();
 
-                    //Intent a = new Intent(LoginActivity.this, APK_Update.class);
-                    //startActivity(a);
+                    Intent a = new Intent(LoginActivity.this, APK_Update.class);
+                    startActivity(a);
                 }
             }
         });

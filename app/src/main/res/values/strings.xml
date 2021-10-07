@@ -8,6 +8,7 @@
     <string name="txt_phone_number">Phone Number:<font color='#FF0000'>*</font></string>
     <string name="txt_physical_location">Physical Location:<font color='#FF0000'>*</font></string>
     <string name="txt_dob">Date of Birth:<font color='#FF0000'>*</font></string>
+    <string name="txt_gender_types">Select Gender:<font color='#FF0000'>*</font></string>
 
 
     <string name="txt_select_account">Select Account:<font color='#FF0000'>*</font></string>

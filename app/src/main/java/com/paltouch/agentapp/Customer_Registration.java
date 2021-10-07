@@ -1246,7 +1246,7 @@ public class Customer_Registration extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"//Agent/Registration/RegisterAgent/Add";
+            String serviceurl = GlobalVariables.surl +"/Agent/Registration/RegisterAgent/Add";
             JSONObject object1;
             JSONArray object2;
             object1 = new JSONObject();

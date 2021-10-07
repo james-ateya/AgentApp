@@ -1,20 +1,29 @@
 package com.paltouch.agentapp;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -43,6 +52,22 @@ public class APK_Update extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apk_update);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!getPackageManager().canRequestPackageInstalls()) {
+                startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), 1234);
+            } else {
+            }
+        }
+
+        //Storage Permission
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
 
         textView2 = (TextView) findViewById(R.id.textView2);
         btnUpdate = (Button)findViewById(R.id.btnUpdate);
@@ -53,21 +78,22 @@ public class APK_Update extends AppCompatActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 // If you have access to the external storage, do whatever you need
-                new DownloadFilesTask().execute();
-                /*
-                if (Environment.isExternalStorageManager()){
-                    File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
-                    file.delete();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if (Environment.isExternalStorageManager()){
+                        File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
+                        file.delete();
+                        new DownloadFilesTask().execute();
+                    }
+                    else{
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                        Uri uri = Uri.fromParts("package", APK_Update.this.getPackageName(), null);
+                        intent.setData(uri);
+                        startActivity(intent);
+                    }
+                }else {
                     new DownloadFilesTask().execute();
                 }
-                else{
-                    Intent intent = new Intent();
-                    intent.setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                    Uri uri = Uri.fromParts("package", APK_Update.this.getPackageName(), null);
-                    intent.setData(uri);
-                    startActivity(intent);
-                }
-                 */
             }
         });
     }
@@ -110,13 +136,12 @@ public class APK_Update extends AppCompatActivity {
         }
     };
 
-    private void installApk(View view){
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Uri uri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),"Intro-release.apk"));
-        intent.setDataAndType(uri, "application/vnd.android.package-archive");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+    private void installApk3(View view){
+        Intent promptInstall = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory(),"Intro-release.apk")),
+                        "application/vnd.android.package-archive");
+        promptInstall.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(promptInstall);
 
         try {
             Thread.sleep(1500);
@@ -145,6 +170,55 @@ public class APK_Update extends AppCompatActivity {
         file.delete();
     }
 
+    void installAPK(View view){
+        String PATH = Environment.getExternalStorageDirectory() + "/" + "Intro-release.apk";
+        File file = new File(PATH);
+        if(file.exists()) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uriFromFile(getApplicationContext(), new File(PATH)), "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                getApplicationContext().startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                e.printStackTrace();
+                Log.e("TAG", "Error in opening the file!");
+            }
+        }else{
+            Toast.makeText(getApplicationContext(),"installing",Toast.LENGTH_LONG).show();
+        }
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        for(int i=0;i<100;)
+        {
+            System.gc();
+            if(view.getWindowVisibility()==View.INVISIBLE)
+            {
+                i=200;
+                System.gc();
+            }
+            try {
+                Thread.sleep(500);
+                System.gc();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        file.delete();
+    }
+    Uri uriFromFile(Context context, File file) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+        } else {
+            return Uri.fromFile(file);
+        }
+    }
+
 
     private class DownloadFilesTask extends AsyncTask<String,String, String> {
 
@@ -159,6 +233,8 @@ public class APK_Update extends AppCompatActivity {
             // TODO Auto-generated method stub
             JSch jsch = new JSch();
             try {
+                File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
+                file.delete();
                 String ip = GlobalVariables.apk_download_link;
                 Session session = jsch.getSession("ateya", ip, 1989);
                 session.setTimeout(30000000);
@@ -173,8 +249,8 @@ public class APK_Update extends AppCompatActivity {
                 sftpChannel.connect();
 
                 File sdcard = Environment.getExternalStorageDirectory();
-                File file = new File(sdcard, "Intro-release.apk");
-                FileOutputStream out = new FileOutputStream(file);
+                File file2 = new File(sdcard, "Intro-release.apk");
+                FileOutputStream out = new FileOutputStream(file2);
                 long filesize = sftpChannel.lstat("Intro-release.apk").getSize();
 
                 //sftpChannel.get("Intro-release.apk", out, monitor);
@@ -215,7 +291,7 @@ public class APK_Update extends AppCompatActivity {
         protected void onPostExecute(String result) {
             // dismiss the dialog after the file was downloaded
             dismissDialog(progress_bar_type);
-            //installApk(btnUpdate);
+            installAPK(btnUpdate);
         }
 
     }

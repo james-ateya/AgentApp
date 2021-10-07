@@ -10,26 +10,24 @@
     <!--tools:context="capsol.rancher.com.rancher.startup.apkUpdates.ApkUpdateActivity"-->
 
 
+    <Button
+        android:id="@+id/btnUpdate"
+        android:layout_width="149dp"
+        android:layout_height="87dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/btn_bg_design"
+        android:text="UPDATE"
+        android:visibility="visible" />
+
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/btnUpdate"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="72dp"
-        android:text="Please click on UPDATE above."
-        android:textColor="#000000"
-        android:textSize="25dp" />
-
-    <Button
-        android:id="@+id/btnUpdate"
-        android:layout_width="149dp"
-        android:layout_height="87dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="-257dp"
-        android:layout_toRightOf="@+id/textView1"
-        android:text="UPDATE"
-        android:visibility="visible" />
+        android:text="Click on UPDATE above."
+        android:textColor="@color/black"
+        android:textSize="20dp" />
 
     <ProgressBar
         android:id="@+id/progressBar1"

@@ -13,14 +13,13 @@
             android:layout_width="fill_parent"
             android:layout_height="200dp"
             android:layout_alignParentTop="true"
-            android:background="#ffffff"
             android:gravity="center"
-            android:padding="10dp" >
+            android:padding="10dp">
 
             <ImageView
-                android:layout_width="196dp"
-                android:layout_height="184dp"
-                android:background="@drawable/lipasasa"
+                android:layout_width="fill_parent"
+                android:layout_height="100dp"
+                android:background="@drawable/lipasasa_logo"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="30dp"

@@ -206,30 +206,33 @@ public class Customer_Registration extends Activity {
             @Override
             public void onClick(View v) {
                 //Check if suppied ID exists
-                if (getnetwork_state()) {
-                    if (!module_back) {
-                        CheckifIDexists check = new CheckifIDexists();
-                        check.execute();
-                    } else {
+                //if (getnetwork_state()) {
+                    //if (!module_back) {
+                    //    CheckifIDexists check = new CheckifIDexists();
+                    //    check.execute();
+                    //} else {
                         customer_static_data.setVisibility(View.GONE);
                         account_configs.setVisibility(View.VISIBLE);
                         account_configuration = true;
                         module_back = false;
-                    }
-                }else {
+                    //}
+                /*}else {
                     new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
                             setTitleText("Internet Disconnected").
                             setContentText("Please check your internet connection and try again.").show();
                     return;
                 }
+
+                 */
             }
         });
         second_interface_config();
-
+        /*
         if(getnetwork_state()){
             GetDocumentTypes getdocumenttypes = new GetDocumentTypes();
             getdocumenttypes.execute();
-        }else{
+        }
+        else{
             new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
                     setTitleText("Internet Failure!").setContentText("Please check your internet connection").
                     setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -243,6 +246,8 @@ public class Customer_Registration extends Activity {
                     }).
                     show();
         }
+
+         */
     }
 
     @Override

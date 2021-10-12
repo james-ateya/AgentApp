@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/app_bg_include_top"
+    android:background="@drawable/app_bg_white"
     tools:context=".Customer_Registration"
     android:orientation="vertical">
 
@@ -21,12 +21,12 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="86dp"
+                android:layout_height="40dp"
                 android:layout_alignParentLeft="true"
                 android:layout_marginTop="8dp"
                 android:onClick="CustRegBackbutton_click"
-                android:src="@drawable/btn_back"></ImageView>
+                android:src="@drawable/back_btn_1"></ImageView>
 
             <TextView
                 android:layout_width="match_parent"
@@ -35,9 +35,9 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:text="CUSTOMER STATIC DATA"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:textSize="20dp"
-                android:textStyle="bold|italic">
+                android:textStyle="bold">
 
             </TextView>
         </LinearLayout>
@@ -299,12 +299,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="86dp"
+                android:layout_height="40dp"
                 android:layout_alignParentLeft="true"
                 android:layout_marginTop="8dp"
                 android:onClick="CustAccBackbutton_click"
-                android:src="@drawable/btn_back">
+                android:src="@drawable/back_btn_1">
             </ImageView>
 
             <TextView
@@ -313,8 +313,8 @@
                 android:gravity="center"
                 android:text="CUSTOMER ACCOUNT CONFIGURATION"
                 android:textSize="20dp"
-                android:textStyle="bold|italic"
-                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textColor="@color/black"
                 android:layout_marginTop="8dp">
 
             </TextView>

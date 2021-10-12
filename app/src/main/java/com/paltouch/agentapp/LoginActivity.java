@@ -116,12 +116,12 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
                     GlobalVariables.username=edt_username.getText().toString();
                     GlobalVariables.password=edt_password.getText().toString();
 
-                    //Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
-                    //startActivity(confirm);
-                    //LoginActivity.this.finish();
+                    Intent confirm=new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(confirm);
+                    LoginActivity.this.finish();
 
-                    login_User login = new login_User();
-                    login.execute();
+                    //login_User login = new login_User();
+                    //login.execute();
 
                     //Intent a = new Intent(LoginActivity.this, APK_Update.class);
                     //startActivity(a);

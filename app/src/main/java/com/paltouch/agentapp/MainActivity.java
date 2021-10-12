@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
         btn_deposit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(getnetwork_state()) {
+                    //if(getnetwork_state()) {
                         Active_session = true;
                         //check_loggedin check_session = new check_loggedin();
                         //check_session.execute();
@@ -47,9 +47,9 @@ public class MainActivity extends Activity {
                             startActivity(customerdeposits);
                             MainActivity.this.finish();
                         }
-                    }else {
-                        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
-                    }
+                    //}else {
+                    //    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                    //}
                 }
         });
 

@@ -1,10 +1,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:drawable="@drawable/deposit_pop"
+        android:drawable="@drawable/btn_deposits_pop"
         android:state_focused="true"
         android:state_pressed="true" />
     <item
-        android:drawable="@drawable/deposit_pop"
+        android:drawable="@drawable/btn_deposits_pop"
         android:state_focused="false"
         android:state_pressed="true" />
     <item

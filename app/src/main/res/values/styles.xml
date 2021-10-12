@@ -16,8 +16,7 @@
     <style name="FooterBar">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">50dp</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:background">@color/btnbackground</item>
+        <item name="android:background">@drawable/gradient</item>
     </style>
 
     <style name="DashboardButton">

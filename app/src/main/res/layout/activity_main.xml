@@ -12,7 +12,4 @@
     <!--  Include Fragmented dashboard -->
     <include
         layout="@layout/fragment_layout"/>
-
-
-
 </LinearLayout>

@@ -867,7 +867,6 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         protected Void doInBackground(Void... params) {
             String serviceurl = GlobalVariables.surl +"/";
             JSONObject object1;
-            JSONArray object2;
             object1 = new JSONObject();
             URL url = null;
             try {
@@ -879,7 +878,6 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 object1.put("client_no",member_no);
                 object1.put("agent_no","0");
                 object1.put("amount",totalC);
-                //object2.put(allocations);
                 object1.put("allocations",allocations);
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -93,7 +93,6 @@
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
             android:tag="Select Account Name"
-            android:entries="@array/Accounts_to_select"
             android:textAlignment="textStart"></Spinner>
 
         <EditText
@@ -102,6 +101,7 @@
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
             android:hint="Enter Amount"
+            android:inputType="number"
             android:textColor="@color/black"></EditText>
 
     </LinearLayout>

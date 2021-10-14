@@ -89,15 +89,25 @@ public class MainActivity extends Activity {
         new SweetAlertDialog(MainActivity.this,
                 SweetAlertDialog.WARNING_TYPE)
                 .setTitleText("Logout")
-                .setContentText("Do you want to logout?").setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-            @Override
-            public void onClick(SweetAlertDialog sDialog) {
-                sDialog.dismissWithAnimation();
-                Intent login=new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(login);
-                MainActivity.this.finish();
-            }
-        }).show();
+                .setContentText("Do you want to logout?").
+                showCancelButton(true).setConfirmText("YES").setCancelText("NO").
+                setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        sDialog.dismissWithAnimation();
+                        Intent login=new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(login);
+                        MainActivity.this.finish();
+                    }
+                }).
+                setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismissWithAnimation();
+                        return;
+                    }
+                }).
+                show();
     }
 
     @Override

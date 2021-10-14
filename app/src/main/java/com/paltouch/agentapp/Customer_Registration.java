@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -89,7 +90,7 @@ public class Customer_Registration extends Activity {
 
     //Second Interface
     Spinner spn_account_type,spn_lock_mode,spn_gendertypes;
-    EditText edt_target_amount,edt_payee_account,edt_ref;
+    EditText edt_target_amount,edt_configured_accounts;
     TextView txt_date_of_maturity;
     Button btn_update_details,btnsave_details,btn_next;
     boolean account_configuration = false;
@@ -205,29 +206,58 @@ public class Customer_Registration extends Activity {
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Check if suppied ID exists
-                //if (getnetwork_state()) {
-                    //if (!module_back) {
-                    //    CheckifIDexists check = new CheckifIDexists();
-                    //    check.execute();
-                    //} else {
-                        customer_static_data.setVisibility(View.GONE);
-                        account_configs.setVisibility(View.VISIBLE);
-                        account_configuration = true;
-                        module_back = false;
-                    //}
-                /*}else {
-                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
-                            setTitleText("Internet Disconnected").
-                            setContentText("Please check your internet connection and try again.").show();
-                    return;
+                //Validations
+                if(Edt_Customername.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this,"Provide Client Name.",Toast.LENGTH_LONG).show();
+                    Edt_Customername.requestFocus();
                 }
-
-                 */
+                else if(spn_document_type == null || spn_document_type.getSelectedItem() == null){
+                    Toast.makeText(Customer_Registration.this,"Select Client Document Type.",Toast.LENGTH_LONG).show();
+                }
+                else if(edt_document_type_id.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this,"Provide Client Identification Number.",Toast.LENGTH_LONG).show();
+                    edt_document_type_id.requestFocus();
+                }
+                else if(spn_phonecountry == null || spn_phonecountry.getSelectedItem() == null){
+                    Toast.makeText(Customer_Registration.this,"Select Client Phone Country.",Toast.LENGTH_LONG).show();
+                }
+                else if(edt_phonenumber.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this,"Provide client phone number.",Toast.LENGTH_LONG).show();
+                    edt_phonenumber.requestFocus();
+                }
+                else if(edt_physical_location.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this,"Provide Client Physical Location.",Toast.LENGTH_LONG).show();
+                    edt_physical_location.requestFocus();
+                }
+                else if(txt_dateofbirth.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this,"Provide Client Date of Birth.",Toast.LENGTH_LONG).show();
+                }
+                else if(spn_gendertypes == null || spn_gendertypes.getSelectedItem() == null){
+                    Toast.makeText(Customer_Registration.this,"Select Client gender type.",Toast.LENGTH_LONG).show();
+                }else {
+                    //Check if suppied ID exists
+                    if (getnetwork_state()) {
+                        if (!module_back) {
+                            CheckifIDexists check = new CheckifIDexists();
+                            check.execute();
+                        } else {
+                            customer_static_data.setVisibility(View.GONE);
+                            account_configs.setVisibility(View.VISIBLE);
+                            account_configuration = true;
+                            module_back = false;
+                        }
+                    }
+                    else {
+                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                                setTitleText("Internet Disconnected").
+                                setContentText("Please check your internet connection and try again.").show();
+                        return;
+                    }
+                }
             }
         });
         second_interface_config();
-        /*
+
         if(getnetwork_state()){
             GetDocumentTypes getdocumenttypes = new GetDocumentTypes();
             getdocumenttypes.execute();
@@ -246,8 +276,6 @@ public class Customer_Registration extends Activity {
                     }).
                     show();
         }
-
-         */
     }
 
     @Override
@@ -259,10 +287,27 @@ public class Customer_Registration extends Activity {
             account_configuration = false;
             module_back = true;
         }else{
-            super.onBackPressed();
-            Intent i = new Intent(Customer_Registration.this, MainActivity.class);
-            startActivity(i);
-            Customer_Registration.this.finish();
+            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                    setTitleText("EXIT").setContentText("Do you want to Exit this page?").
+                    showCancelButton(true).setConfirmText("YES").setCancelText("NO").
+                    setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            Customer_Registration.super.onBackPressed();
+                            Intent i = new Intent(Customer_Registration.this, MainActivity.class);
+                            startActivity(i);
+                            Customer_Registration.this.finish();
+                        }
+                    }).
+                    setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            return;
+                        }
+                    }).
+                    show();
         }
     }
 
@@ -347,50 +392,82 @@ public class Customer_Registration extends Activity {
                 txt_date_of_maturity.setText(dateString);
             }
         };
+
+        edt_configured_accounts = (EditText) findViewById(R.id.edt_configured_accounts);
+
         btn_update_details = (Button) findViewById(R.id.btn_update_details);
         btn_update_details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    if(readings.isEmpty()){
-                        readings.add(selected_account_name);
-                        account_list.put("AccountTypeId",selected_account_id);
-                        account_list.put("AccountTypeName",selected_account_name);
-                        account_list.put("AccountTargetAmount",edt_target_amount.getText().toString());
-                        account_list.put("AccountTargetTimeScheduleId",selected_timeschdule_id);
-                        account_list.put("TimeScheduleName",selected_timeschdule_name);
-                        account_list.put("FirstMaturityDate",txt_date_of_maturity.getText().toString());
+                //Validate Fields
+                if(spn_account_type == null || spn_account_type.getSelectedItem() == null){
+                    Toast.makeText(Customer_Registration.this, "Select Client Account.", Toast.LENGTH_LONG).show();
+                }
+                else if(spn_lock_mode == null || spn_lock_mode.getSelectedItem() == null){
+                    Toast.makeText(Customer_Registration.this, "Select Client Time Schedule.", Toast.LENGTH_LONG).show();
+                }
+                else if(edt_target_amount.getText().toString().isEmpty() || Integer.parseInt(edt_target_amount.getText().toString()) <= 0){
+                    Toast.makeText(Customer_Registration.this, "Supply Correct Amount.", Toast.LENGTH_LONG).show();
+                    edt_target_amount.requestFocus();
+                }
+                else if(txt_date_of_maturity.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this, "Supply Correct Maturity Date.", Toast.LENGTH_LONG).show();
+                }else {
+                    try {
+                        if (readings.isEmpty()) {
+                            readings.add(selected_account_name);
+                            account_list.put("AccountTypeId", selected_account_id);
+                            account_list.put("AccountTypeName", selected_account_name);
+                            account_list.put("AccountTargetAmount", edt_target_amount.getText().toString());
+                            account_list.put("AccountTargetTimeScheduleId", selected_timeschdule_id);
+                            account_list.put("TimeScheduleName", selected_timeschdule_name);
+                            account_list.put("FirstMaturityDate", txt_date_of_maturity.getText().toString());
+                            account_list.put("MaxPermitedOperations",1);
 
-                        registration_account_list.put(account_list);
+                            registration_account_list.put(account_list);
 
-                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
-                                setTitleText("UPDATED").
-                                setContentText("Account Details updated successfully.").show();
+                            StringBuffer sbitems = new StringBuffer();
+                            for (int i = 0; i < readings.size(); i++) {
+                                sbitems.append("Account " + (i + 1) + ": " + readings.get(i) + "\n");
+                            }
+                            edt_configured_accounts.setText("");
+                            edt_configured_accounts.setText(sbitems.toString());
+
+                            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
+                                    setTitleText("UPDATED").
+                                    setContentText("Account Details updated successfully.").show();
+                        } else if (readings.contains(selected_account_name)) {
+                            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
+                                    setTitleText("Duplicate Account").
+                                    setContentText(selected_account_name + " Has Already Been Configured.").show();
+                            return;
+                        } else {
+                            readings.add(selected_account_name);
+                            account_list.put("AccountTypeId", selected_account_id);
+                            account_list.put("AccountTypeName", selected_account_name);
+                            account_list.put("AccountTargetAmount", edt_target_amount.getText().toString());
+                            account_list.put("AccountTargetTimeScheduleId", selected_timeschdule_id);
+                            account_list.put("TimeScheduleName", selected_timeschdule_name);
+                            account_list.put("FirstMaturityDate", txt_date_of_maturity.getText().toString());
+
+                            registration_account_list.put(account_list);
+
+                            StringBuffer sbitems = new StringBuffer();
+                            for (int i = 0; i < readings.size(); i++) {
+                                sbitems.append("Account " + (i + 1) + ": " + readings.get(i) + "\n");
+                            }
+                            edt_configured_accounts.setText("");
+                            edt_configured_accounts.setText(sbitems.toString());
+
+                            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
+                                    setTitleText("UPDATED").
+                                    setContentText("Account Details updated successfully.").show();
+                            return;
+                        }
                     }
-                    else if(readings.contains(selected_account_name)){
-                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
-                                setTitleText("Duplicate Account").
-                                setContentText(selected_account_name + " Has Already Been Configured.").show();
-                        return;
+                    catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    else{
-                        readings.add(selected_account_name);
-                        account_list.put("AccountTypeId",selected_account_id);
-                        account_list.put("AccountTypeName",selected_account_name);
-                        account_list.put("AccountTargetAmount",edt_target_amount.getText().toString());
-                        account_list.put("AccountTargetTimeScheduleId",selected_timeschdule_id);
-                        account_list.put("TimeScheduleName",selected_timeschdule_name);
-                        account_list.put("FirstMaturityDate",txt_date_of_maturity.getText().toString());
-
-                        registration_account_list.put(account_list);
-
-                        new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
-                                setTitleText("UPDATED").
-                                setContentText("Account Details updated successfully.").show();
-                        return;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
 
             }
@@ -1233,7 +1310,7 @@ public class Customer_Registration extends Activity {
 
                             data_back_timeschdule = true;
                             list_timeschedule.add(timeschdule_name);
-                            list2_timeschedule.add(timeschdule_name);
+                            list2_timeschedule.add(timeschdule_id);
                         }
 
                         //Read the list
@@ -1449,6 +1526,7 @@ public class Customer_Registration extends Activity {
                 phonecountry_selected = null;
                 registration_account_list = new JSONArray();
                 readings.clear();
+                edt_configured_accounts.setText("");
 
                 Message msg1 = mhandler.obtainMessage();
                 Bundle bundle1 = new Bundle();

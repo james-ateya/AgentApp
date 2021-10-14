@@ -150,8 +150,13 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 title = new String[0];
                 boolean network_state = getnetwork_state();
                 if(network_state){
-                    GetClientInfo getinfo = new GetClientInfo();
-                    getinfo.execute();
+                    if(!edt_searchclient.getText().toString().isEmpty()) {
+                        GetClientInfo getinfo = new GetClientInfo();
+                        getinfo.execute();
+                    }else{
+                        Toast.makeText(CustomerDeposits.this,"Supply Client ID Number",Toast.LENGTH_LONG).show();
+                        edt_searchclient.requestFocus();
+                    }
                 }else {
                     //No Connection
                     Toast.makeText(CustomerDeposits.this,"Internet Disconnected",Toast.LENGTH_LONG).show();
@@ -188,37 +193,49 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         btncompletetransaction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Save batch transactions
-                try {
-                    collected_data.put("account_no",selected_account_no);
-                    collected_data.put("amount",edt_amount.getText().toString());
-                    allocations.put(collected_data);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                //Save batch
+                if(edt_searchclient.getText().toString().isEmpty()){
+                    Toast.makeText(CustomerDeposits.this,"Supply Client ID Number",Toast.LENGTH_LONG).show();
+                    edt_searchclient.requestFocus();
+                } else if(spn_accounts == null || spn_accounts.getSelectedItem() == null){
+                    Toast.makeText(CustomerDeposits.this,"Select Customer Account.",Toast.LENGTH_LONG).show();
                 }
-
-                String total_amount1 = edt_amount.getText().toString();
-                total_amount.add(total_amount1);
-
-                List<String> Account_name = new ArrayList<String>();
-                Account_name.add(selected_account_name);
-
-                List<String> Amount = new ArrayList<String>();
-                Amount.add(edt_amount.getText().toString());
-
-                StringBuffer sbitems2 = new StringBuffer();
-
-                for(int i = 0;i<Account_name.size();i++ ) {
-                    sbitems.append(Account_name.get(i) + ": " + Amount.get(i) + "\n");
+                else if (edt_amount.getText().toString().isEmpty() || Integer.parseInt(edt_amount.getText().toString()) <= 0) {
+                    Toast.makeText(CustomerDeposits.this,"Supply Amount.",Toast.LENGTH_LONG).show();
+                    edt_amount.requestFocus();
                 }
+                else {
+                    try {
+                        collected_data.put("account_no", selected_account_no);
+                        collected_data.put("amount", edt_amount.getText().toString());
+                        allocations.put(collected_data);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
-                for (int i = 0; i < total_amount.size(); i++) {
-                    totalC = totalC + Double.valueOf(total_amount.get(i));
+                    String total_amount1 = edt_amount.getText().toString();
+                    total_amount.add(total_amount1);
+
+                    List<String> Account_name = new ArrayList<String>();
+                    Account_name.add(selected_account_name);
+
+                    List<String> Amount = new ArrayList<String>();
+                    Amount.add(edt_amount.getText().toString());
+
+                    StringBuffer sbitems2 = new StringBuffer();
+
+                    for (int i = 0; i < Account_name.size(); i++) {
+                        sbitems.append(Account_name.get(i) + ": " + Amount.get(i) + "\n");
+                    }
+
+                    for (int i = 0; i < total_amount.size(); i++) {
+                        totalC = totalC + Double.valueOf(total_amount.get(i));
+                    }
+                    sbitems2.append("Total: " + totalC);
+                    edadditems.setText("");
+                    edadditems.setText(sbitems.toString() + "\n" + sbitems2.toString());
+
                 }
-                sbitems2.append("Total: " + totalC);
-                edadditems.setText("");
-                edadditems.setText(sbitems.toString() + "\n" + sbitems2.toString());
-
             }
         });
 
@@ -229,6 +246,12 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                 if(getnetwork_state()){
                     SaveCollections savedata =  new SaveCollections();
                     savedata.execute();
+                }else {
+                    new SweetAlertDialog(CustomerDeposits.this,
+                            SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("ERROR...")
+                            .setContentText("Please Connect to the internet first.").show();
+                    return;
                 }
             }
         });
@@ -253,19 +276,37 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
     @Override
     public void onBackPressed() {
         // TODO Auto-generated method stub
-        super.onBackPressed();
-        Intent i = new Intent(CustomerDeposits.this, MainActivity.class);
-        startActivity(i);
-        CustomerDeposits.this.finish();
+        new SweetAlertDialog(CustomerDeposits.this, SweetAlertDialog.WARNING_TYPE).
+                setTitleText("EXIT").setContentText("Do you want to Exit this page?").
+                showCancelButton(true).setConfirmText("YES").setCancelText("NO").
+                setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        sDialog.dismissWithAnimation();
+                        CustomerDeposits.super.onBackPressed();
+                        Intent main = new Intent(getApplicationContext(),MainActivity.class);
+                        startActivity(main);
+                        CustomerDeposits.this.finish();
+                    }
+                }).
+                setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        sDialog.dismissWithAnimation();
+                        return;
+                    }
+                }).
+                show();
     }
 
     @Override
     public void onResume(){
-        super.onResume();
         if(useprinter){
+            super.onResume();
             printerswitch.setVisibility(View.VISIBLE);
             btnprintreceipt.setVisibility(View.VISIBLE);
         }else {
+            super.onResume();
             printerswitch.setVisibility(View.GONE);
             btnprintreceipt.setVisibility(View.GONE);
         }
@@ -857,7 +898,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(CustomerDeposits.this);
-            pDialog.setMessage("Sending Data...");
+            pDialog.setMessage("Saving Client Deposits...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.show();
@@ -865,7 +906,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/";
+            String serviceurl = GlobalVariables.surl +"/Agency/Allocation/Add";
             JSONObject object1;
             object1 = new JSONObject();
             URL url = null;
@@ -876,7 +917,6 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             }
             try {
                 object1.put("client_no",member_no);
-                object1.put("agent_no","0");
                 object1.put("amount",totalC);
                 object1.put("allocations",allocations);
             } catch (JSONException e) {
@@ -916,7 +956,8 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
 
 
-                } else {
+                }
+                else {
                     data_back = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -928,8 +969,8 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
                     System.out.println("Message >>>>>>" + response_errormessage);
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
@@ -954,6 +995,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
 
         @Override
         protected void onPostExecute(Void file_url) {
+            if (pDialog.isShowing()) {
+                pDialog.dismiss();
+            }
             collected_data = new JSONObject();
             allocations = new JSONArray();
             total_amount.clear();

@@ -1203,14 +1203,14 @@ public class Customer_Registration extends Activity {
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
                     System.out.println("Message >>>>>>" + response_errormessage);
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
                     bundle1.putString("MSG_KEY", response_errormessage);
                     msg1.setData(bundle1);
-                    msg1.what = 5;
+                    msg1.what = 7;
                     mhandler.sendMessage(msg1);
                 }
             } catch (IOException | JSONException e) {

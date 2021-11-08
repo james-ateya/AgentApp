@@ -425,6 +425,7 @@ public class Customer_Registration extends Activity {
                             account_list.put("MaxPermitedOperations",1);
 
                             registration_account_list.put(account_list);
+                            account_list = new JSONObject();
 
                             StringBuffer sbitems = new StringBuffer();
                             for (int i = 0; i < readings.size(); i++) {
@@ -449,8 +450,10 @@ public class Customer_Registration extends Activity {
                             account_list.put("AccountTargetTimeScheduleId", selected_timeschdule_id);
                             account_list.put("TimeScheduleName", selected_timeschdule_name);
                             account_list.put("FirstMaturityDate", txt_date_of_maturity.getText().toString());
+                            account_list.put("MaxPermitedOperations",1);
 
                             registration_account_list.put(account_list);
+                            account_list = new JSONObject();
 
                             StringBuffer sbitems = new StringBuffer();
                             for (int i = 0; i < readings.size(); i++) {
@@ -1117,6 +1120,7 @@ public class Customer_Registration extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetDefaultAccounts";
+            //String serviceurl = GlobalVariables.surl +"/Members/AddMemberAccounts/AccountNames";
             JSONObject object1;
             object1 = new JSONObject();
             URL url = null;
@@ -1158,6 +1162,9 @@ public class Customer_Registration extends Activity {
 
                             AccountTypeName = verifyresult2.getString("AccountTypeName");
                             AccountTypeId = verifyresult2.getString("AccountTypeId");
+
+                            //AccountTypeName = verifyresult2.getString("name");
+                            //AccountTypeId = verifyresult2.getString("id");
 
                             data_back3 = true;
                             list4.add(AccountTypeName);

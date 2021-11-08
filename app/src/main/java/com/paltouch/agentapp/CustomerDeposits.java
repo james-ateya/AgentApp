@@ -209,6 +209,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                         collected_data.put("account_no", selected_account_no);
                         collected_data.put("amount", edt_amount.getText().toString());
                         allocations.put(collected_data);
+                        collected_data = new JSONObject();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -227,7 +228,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     for (int i = 0; i < Account_name.size(); i++) {
                         sbitems.append(Account_name.get(i) + ": " + Amount.get(i) + "\n");
                     }
-
+                    totalC = 0.0;
                     for (int i = 0; i < total_amount.size(); i++) {
                         totalC = totalC + Double.valueOf(total_amount.get(i));
                     }

@@ -41,7 +41,8 @@
             android:textSize="18dp"
             android:thumb="@drawable/switch_selector"
             android:thumbTextPadding="10dp"
-            android:track="@drawable/customtrack"/>
+            android:track="@drawable/customtrack"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <LinearLayout
@@ -163,7 +164,8 @@
             android:text="Print"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="20dp"></Button>
+            android:textSize="20dp"
+            android:visibility="gone"></Button>
     </LinearLayout>
 
 </RelativeLayout>

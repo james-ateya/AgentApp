@@ -28,28 +28,33 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 public class MainActivity extends Activity {
     Button btn_deposit,btn_withdraw,btn_settings,btn_reports,btn_info,btn_customer;
     private boolean Active_session;
-
-
+    private boolean deposit,withdraw,reports,info,customer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        deposit = false;
+        withdraw=false;
+        reports=false;
+        info=false;
+        customer = false;
+
         btn_deposit = (Button) findViewById(R.id.btn_deposit);
         btn_deposit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //if(getnetwork_state()) {
-                        Active_session = true;
-                        //check_loggedin check_session = new check_loggedin();
-                        //check_session.execute();
-                        if (Active_session) {
-                            Intent customerdeposits = new Intent(MainActivity.this, CustomerDeposits.class);
-                            startActivity(customerdeposits);
-                            MainActivity.this.finish();
-                        }
-                    //}else {
-                    //    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
-                    //}
+                    if(getnetwork_state()) {
+                        //Active_session = true;
+                        deposit = true;
+                        withdraw=false;
+                        reports=false;
+                        info=false;
+                        customer = false;
+                        check_loggedin check_session = new check_loggedin();
+                        check_session.execute();
+                    }else {
+                       new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                    }
                 }
         });
 
@@ -67,18 +72,35 @@ public class MainActivity extends Activity {
         btn_customer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //if(getnetwork_state()) {
-                //    Active_session = false;
-                //    check_loggedin check_session = new check_loggedin();
-                //    check_session.execute();
-                //    if (Active_session) {
-                        Intent iscustomer_reg = new Intent(MainActivity.this, Customer_Registration.class);
-                        startActivity(iscustomer_reg);
-                        MainActivity.this.finish();
-                //    }
-                //}else{
-                //    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
-                //}
+                if(getnetwork_state()) {
+                    deposit = false;
+                    withdraw=false;
+                    reports=false;
+                    info=false;
+                    customer = true;
+                    check_loggedin check_session = new check_loggedin();
+                    check_session.execute();
+                }else{
+                    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                }
+            }
+        });
+
+        btn_info = (Button) findViewById(R.id.btn_info);
+        btn_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(getnetwork_state()) {
+                    deposit = false;
+                    withdraw=false;
+                    reports=false;
+                    info=true;
+                    customer = false;
+                    check_loggedin check_session = new check_loggedin();
+                    check_session.execute();
+                }else{
+                    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                }
             }
         });
 
@@ -175,7 +197,7 @@ public class MainActivity extends Activity {
                     //Still logged in
                     Message msg1 = mhandler.obtainMessage();
                     Bundle bundle1 = new Bundle();
-                    bundle1.putString("MSG_KEY", "Session Active");
+                    bundle1.putString("MSG_KEY", "Session Active.");
                     msg1.setData(bundle1);
                     msg1.what=1;
                     mhandler.sendMessage(msg1);
@@ -243,18 +265,19 @@ public class MainActivity extends Activity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case 1:
-                    Bundle bundle6 = msg.getData();
-                    String string6 = bundle6.getString("MSG_KEY");
-                    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.SUCCESS_TYPE).
-                            setTitleText("SUCCESS!").setContentText(string6).
-                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sDialog) {
-                                    Active_session = true;
-                                    sDialog.dismissWithAnimation();
-                                }
-                            }).
-                            show();
+                    if(deposit == true) {
+                        Intent customerdeposits = new Intent(MainActivity.this, CustomerDeposits.class);
+                        startActivity(customerdeposits);
+                        MainActivity.this.finish();
+                    }else if(customer){
+                        Intent iscustomer_reg = new Intent(MainActivity.this, Customer_Registration.class);
+                        startActivity(iscustomer_reg);
+                        MainActivity.this.finish();
+                    }else{
+                        Intent iscustomer_bal = new Intent(MainActivity.this, CustomerAccountBalance.class);
+                        startActivity(iscustomer_bal);
+                        MainActivity.this.finish();
+                    }
 
                     break;
 

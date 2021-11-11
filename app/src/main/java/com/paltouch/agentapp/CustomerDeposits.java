@@ -955,7 +955,7 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                     System.out.println("ATEYA" + sb.toString());
                     String JsonResult = sb.toString();
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-
+                    data_back = true;
 
                 }
                 else {
@@ -1006,6 +1006,18 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
             edt_amount.setText("");
             edt_searchclient.setText("");
             txt_clientname.setText("");
+
+            if(data_back){
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "Transaction Completed Successfully.");
+                msg1.setData(bundle1);
+                msg1.what = 4;
+                mhandler.sendMessage(msg1);
+            }
+            else{
+                return;
+            }
         }
     }
 
@@ -1041,6 +1053,9 @@ public class CustomerDeposits extends Activity implements CompoundButton.OnCheck
                                 @Override
                                 public void onClick(SweetAlertDialog sDialog) {
                                     sDialog.dismissWithAnimation();
+                                    Intent main = new Intent(getApplicationContext(),MainActivity.class);
+                                    startActivity(main);
+                                    CustomerDeposits.this.finish();
                                 }
                             }).
                             show();

@@ -97,6 +97,7 @@ public class Customer_Registration extends Activity {
     Button btn_update_details,btnsave_details,btn_next;
     boolean account_configuration = false;
     boolean module_back = false;
+    boolean data_changed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +193,7 @@ public class Customer_Registration extends Activity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                data_changed=true;
             }
 
             @Override
@@ -260,7 +261,13 @@ public class Customer_Registration extends Activity {
                         if (!module_back) {
                             CheckifIDexists check = new CheckifIDexists();
                             check.execute();
-                        } else {
+                        }
+                        else if(module_back && data_changed){
+                            CheckifIDexists check = new CheckifIDexists();
+                            check.execute();
+                            data_changed = false;
+                        }
+                        else {
                             customer_static_data.setVisibility(View.GONE);
                             account_configs.setVisibility(View.VISIBLE);
                             account_configuration = true;

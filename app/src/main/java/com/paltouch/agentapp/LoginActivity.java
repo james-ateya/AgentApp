@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -50,7 +52,6 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
     public Button btn_login;
     public EditText edt_username;
     public EditText edt_password;
-    private TextView create_account;
     private TextView LostPassword;
     ArrayList<String> permissions=new ArrayList<>();
     PermissionUtils permissionUtils;
@@ -96,8 +97,42 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
         edt_username = (EditText) findViewById(R.id.etUserName);
         edt_password = (EditText) findViewById(R.id.etPass);
 
-        create_account = (TextView) findViewById(R.id.create_account);
         LostPassword = (TextView) findViewById(R.id.lost_password);
+        LostPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                builder.setCancelable(true);
+                builder.setTitle("Change Password?");
+                builder.setInverseBackgroundForced(true);
+
+                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(edt_username.getText().toString().isEmpty()) {
+                            Toast.makeText(LoginActivity.this,"Please Provide your username.",Toast.LENGTH_LONG).show();
+                            edt_username.requestFocus();
+                        }else{
+                            GlobalVariables.touseusername = edt_username.getText().toString();
+                            Intent f_password = new Intent(LoginActivity.this, ForgetPassword.class);
+                            startActivity(f_password);
+                            LoginActivity.this.finish();
+                        }
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
+
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

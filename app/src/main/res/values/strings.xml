@@ -17,9 +17,15 @@
     <string name="txt_maturity_date">Maturity Date:<font color='#FF0000'>*</font></string>
 
 
-    <string-array name="Accounts_to_select">
-        <item>Deposits</item>
-        <item>House Rent</item>
-        <item>Loan</item>
-    </string-array>
+
+    <string name="confirmphone">+254 7..</string>
+    <string name="confirmemail">example@mail.com</string>
+    <string name="codereceived">Enter Code Received</string>
+    <string name="submitcode">Submit</string>
+    <string name="enterpass">Enter Password</string>
+    <string name="Confirmpass">Confirm Password</string>
+    <string name="username">Username</string>
+    <string name="EmailAddress">Email Address</string>
+    <string name="identifierspinner">Please select identifier</string>
+    <string name="getcode">Get Code</string>
 </resources>

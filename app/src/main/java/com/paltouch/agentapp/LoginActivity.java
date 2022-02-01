@@ -1,25 +1,17 @@
 package com.paltouch.agentapp;
 
-import static com.paltouch.agentapp.GlobalVariables.apk_version;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -56,9 +48,6 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
     ArrayList<String> permissions=new ArrayList<>();
     PermissionUtils permissionUtils;
 
-    BluetoothAdapter mBluetoothAdapter;
-    int REQUEST_ENABLE_BT = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,27 +55,12 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
 
         permissionUtils=new PermissionUtils(LoginActivity.this);
 
-        permissions.add(Manifest.permission.BLUETOOTH);
-        permissions.add(Manifest.permission.BLUETOOTH_ADMIN);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         permissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
 
         permissionUtils.check_permission(permissions,"Needed Permissions",1);
-
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            // Device does not support Bluetooth
-            new AlertDialog.Builder(LoginActivity.this).setTitle("BLUETOOTH UNAVAILABLE").setMessage("Sorry,Your device does not support bluetoth").show();
-        }
-        else if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(
-                    BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }else{
-            //Do Nothing, already enabled.
-        }
 
         pd = new ProgressDialog(this);
         alertDialog = new android.app.AlertDialog.Builder(LoginActivity.this);
@@ -165,28 +139,7 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // TODO Auto-generated method stub
-        switch (item.getItemId()) {
-
-            case R.id.action_updateapk:
-
-                break;
-            case R.id.action_kiosk:
-
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     private class login_User extends AsyncTask<Void, Void, Void> {
         ProgressDialog pDialog;
@@ -341,126 +294,13 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
         }
     }
 
-    private class check_apk_updates extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pDialog;
-        @Override
-        protected void onPreExecute() {
-
-            super.onPreExecute();
-            pDialog = new ProgressDialog(LoginActivity.this);
-            pDialog.setMessage("Checking System Updates");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-
-        }
-        @Override
-        protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/GlobalVariables/ApkUpdates/RebindGrid";
-            JSONObject object1;
-            object1 = new JSONObject();
-            URL url = null;
-            try {
-                url = new URL(serviceurl);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            try {
-                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream out = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-                writer.write(object1.toString());
-                writer.flush();
-                writer.close();
-                out.close();
-
-                conn.connect();
-
-                //display what returns the POST request
-                StringBuilder sb = new StringBuilder();
-                int HttpResult = conn.getResponseCode();
-                if (HttpResult == HttpURLConnection.HTTP_OK) {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    br.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
-                    JSONObject jresponse = JsonResultVeriy.getJSONObject("Result");
-
-                    apk_version = jresponse.getString("apk_version");
-                    GlobalVariables.apk_name = jresponse.getString("apk_name");
-                    GlobalVariables.server_path = jresponse.getString("server_path");
-
-                } else {
-                    if (pDialog.isShowing()) {
-                        pDialog.dismiss();
-                    }
-                    System.out.println("*****> " + conn.getErrorStream().toString());
-                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
-                    String line1 = null;
-                    while ((line1 = br1.readLine()) != null) {
-                        sb.append(line1 + "\n");
-                    }
-                    br1.close();
-                    System.out.println("ATEYA" + sb.toString());
-                    String JsonResult = sb.toString();
-                    JSONObject JsonResulterror = new JSONObject(JsonResult);
-                    JSONObject error_object = JsonResulterror.getJSONObject("Result");
-                    String response_errormessage = error_object.getString("Message");
-                    System.out.println("Message >>>>>>" + response_errormessage);
-                }
-            } catch (IOException | JSONException e) {
-                if (pDialog.isShowing()) {
-                    pDialog.dismiss();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void file_url) {
-            if (pDialog.isShowing()) {
-                pDialog.dismiss();
-            }
-            check_apk_update_func();
-        }
-    }
-
-    void check_apk_update_func(){
-        //Run query to check if APK has updated
-        PackageManager manager = this.getPackageManager();
-        PackageInfo info = null;
-        try {
-            info = manager.getPackageInfo(this.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        Double server_apk = Double.parseDouble(apk_version);
-        Double installed_apk = Double.parseDouble(info.versionName);
-
-        if(server_apk > installed_apk){
-            Intent a = new Intent(this, APK_Update.class);
-            startActivity(a);
-        }
-    }
     // Permission check functions
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         // redirects to utils
-        permissionUtils.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        permissionUtils.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
     }
 

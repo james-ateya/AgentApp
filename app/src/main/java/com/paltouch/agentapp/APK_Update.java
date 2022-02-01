@@ -138,7 +138,7 @@ public class APK_Update extends AppCompatActivity {
 
     private void installApk3(View view){
         Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-                .setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory(),"Intro-release.apk")),
+                .setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory(),"lipasasa.apk")),
                         "application/vnd.android.package-archive");
         promptInstall.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(promptInstall);
@@ -166,12 +166,12 @@ public class APK_Update extends AppCompatActivity {
             }
         }
 
-        File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
+        File file = new File(Environment.getExternalStorageDirectory() + "/lipasasa.apk");
         file.delete();
     }
 
     void installAPK(View view){
-        String PATH = Environment.getExternalStorageDirectory() + "/" + "Intro-release.apk";
+        String PATH = Environment.getExternalStorageDirectory() + "/" + "lipasasa.apk";
         File file = new File(PATH);
         if(file.exists()) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -236,26 +236,26 @@ public class APK_Update extends AppCompatActivity {
                 File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
                 file.delete();
                 String ip = GlobalVariables.apk_download_link;
-                Session session = jsch.getSession("ateya", ip, 1989);
+                Session session = jsch.getSession("lipasasa", ip, 1989);
                 session.setTimeout(30000000);
                 java.util.Properties config = new java.util.Properties();
                 config.put("StrictHostKeyChecking", "no");
                 config.put("PreferredAuthentications", "password");
                 session.setConfig(config);
-                session.setPassword("intelinside");
+                session.setPassword("Masai*201514");
                 session.connect();
 
                 ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
                 sftpChannel.connect();
 
                 File sdcard = Environment.getExternalStorageDirectory();
-                File file2 = new File(sdcard, "Intro-release.apk");
+                File file2 = new File(sdcard, "lipasasa.apk");
                 FileOutputStream out = new FileOutputStream(file2);
-                long filesize = sftpChannel.lstat("Intro-release.apk").getSize();
+                long filesize = sftpChannel.lstat("lipasasa.apk").getSize();
 
                 //sftpChannel.get("Intro-release.apk", out, monitor);
                 //Toast.makeText(APK_Update.this,"Starting Download",Toast.LENGTH_LONG).show();
-                InputStream in = sftpChannel.get("Intro-release.apk");
+                InputStream in = sftpChannel.get("lipasasa.apk");
                 //int lenghtOfFile = in.available();
                 byte[] buffer = new byte[1024];
                 int len;

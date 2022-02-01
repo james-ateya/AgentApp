@@ -2,6 +2,7 @@ package com.paltouch.agentapp;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +16,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -47,13 +52,13 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class Customer_Registration extends Activity {
     TextView txt_dateofbirth;
-    EditText Edt_Customername,edt_document_type_id,edt_phonenumber,edt_physical_location;
+    EditText Edt_Customername,edt_document_type_id,edt_phonenumber,edt_physical_location,edt_account_name;
     Spinner spn_document_type,spn_phonecountry;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private DatePickerDialog.OnDateSetListener mDateSetListener_maturitydate;
     RelativeLayout customer_static_data,account_configs;
-    JSONArray registration_account_list;
-    JSONObject account_list;
+    JSONArray registration_account_list,registration_account_list_additional_data;
+    JSONObject account_list,account_list_additional_list;
     boolean data_back_registartion;
     ArrayList<String> readings = new ArrayList<String>();
 
@@ -99,6 +104,19 @@ public class Customer_Registration extends Activity {
     boolean module_back = false;
     boolean data_changed = false;
 
+    //Spinner Adapter
+    String[] title_add_info;
+    String[] title_add_info2;
+    String spinner_item_add_item,key_id,KeyName,AssetTypeDetailsId_val,AssetTypeDetailsId;
+    ArrayList<String> list_added_info = new ArrayList<String>();
+    ArrayList<String> list2_added_info = new ArrayList<String>();
+    boolean data_back_added_info = false;
+    SpinnerAdapter adapter_add_info;
+    ArrayList<String> readings_added_info = new ArrayList<String>();
+    ArrayList<String> readings2_added_info = new ArrayList<String>();
+    SweetAlertDialog sweetAlert;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +124,9 @@ public class Customer_Registration extends Activity {
         setContentView(R.layout.activity_customer_registration);
 
         registration_account_list = new JSONArray();
+        registration_account_list_additional_data = new JSONArray();
         account_list = new JSONObject();
+        account_list_additional_list = new JSONObject();
 
         customer_static_data = (RelativeLayout) findViewById(R.id.wrapping_panel1);
         account_configs = (RelativeLayout) findViewById(R.id.wrapping_panel2);
@@ -258,21 +278,38 @@ public class Customer_Registration extends Activity {
                 }else {
                     //Check if suppied ID exists
                     if (getnetwork_state()) {
-                        if (!module_back) {
-                            CheckifIDexists check = new CheckifIDexists();
-                            check.execute();
-                        }
-                        else if(module_back && data_changed){
-                            CheckifIDexists check = new CheckifIDexists();
-                            check.execute();
-                            data_changed = false;
-                        }
-                        else {
-                            customer_static_data.setVisibility(View.GONE);
-                            account_configs.setVisibility(View.VISIBLE);
-                            account_configuration = true;
-                            module_back = false;
-                        }
+                        sweetAlert = new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE);
+                        sweetAlert.setTitleText("Confirm Details").
+                                setContentText("Please Confirm The Details Before You Proceed.").
+                                setCancelText("Cancel").
+                                setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                    sweetAlertDialog.dismissWithAnimation();
+                                    if (!module_back) {
+                                        CheckifIDexists check = new CheckifIDexists();
+                                        check.execute();
+                                    }
+                                    else if(module_back && data_changed){
+                                        CheckifIDexists check = new CheckifIDexists();
+                                        check.execute();
+                                        data_changed = false;
+                                    }
+                                    else {
+                                        customer_static_data.setVisibility(View.GONE);
+                                        account_configs.setVisibility(View.VISIBLE);
+                                        account_configuration = true;
+                                        module_back = false;
+                                    }
+                                }
+                            }).setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                    sweetAlertDialog.dismissWithAnimation();
+                                    return;
+                                }
+                            }).show();
+                        sweetAlert.setCancelable(false);
                     }
                     else {
                         new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
@@ -351,18 +388,30 @@ public class Customer_Registration extends Activity {
         module_back = true;
     }
 
+
+
     void second_interface_config(){
+
+        edt_account_name = (EditText) findViewById(R.id.edt_account_name);
         spn_account_type = (Spinner) findViewById(R.id.spn_account_type);
         spn_account_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                try {
-                    selected_account_name = (String) title3[position];
-                    selected_account_id = list5.get(position);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
+
+
+                    try {
+                        selected_account_name = (String) title3[position];
+                        selected_account_id = list5.get(position);
+                        spn_account_type.setEnabled(false);
+                        btnsave_details.setEnabled(false);
+                        onItemChangeCallBack call_back = new onItemChangeCallBack();
+                        call_back.execute();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
             }
+
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -450,9 +499,13 @@ public class Customer_Registration extends Activity {
                             account_list.put("TimeScheduleName", selected_timeschdule_name);
                             account_list.put("FirstMaturityDate", txt_date_of_maturity.getText().toString());
                             account_list.put("MaxPermitedOperations",1);
+                            account_list.put("CustomerAccountName",edt_account_name.getText().toString());
+                            account_list.put("AdditionalDataModels",registration_account_list_additional_data);
 
                             registration_account_list.put(account_list);
+
                             account_list = new JSONObject();
+                            registration_account_list_additional_data = new JSONArray();
 
                             StringBuffer sbitems = new StringBuffer();
                             for (int i = 0; i < readings.size(); i++) {
@@ -460,6 +513,11 @@ public class Customer_Registration extends Activity {
                             }
                             edt_configured_accounts.setText("");
                             edt_configured_accounts.setText(sbitems.toString());
+                            spn_account_type.setEnabled(true);
+                            btnsave_details.setEnabled(true);
+                            edt_target_amount.setText("");
+                            txt_date_of_maturity.setText("");
+                            edt_account_name.setText("");
 
                             new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
                                     setTitleText("UPDATED").
@@ -468,6 +526,7 @@ public class Customer_Registration extends Activity {
                             new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
                                     setTitleText("Duplicate Account").
                                     setContentText(selected_account_name + " Has Already Been Configured.").show();
+                            spn_account_type.setEnabled(true);
                             return;
                         } else {
                             readings.add(selected_account_name);
@@ -478,9 +537,12 @@ public class Customer_Registration extends Activity {
                             account_list.put("TimeScheduleName", selected_timeschdule_name);
                             account_list.put("FirstMaturityDate", txt_date_of_maturity.getText().toString());
                             account_list.put("MaxPermitedOperations",1);
+                            account_list.put("CustomerAccountName",edt_account_name.getText().toString());
+                            account_list.put("AdditionalDataModels",registration_account_list_additional_data);
 
                             registration_account_list.put(account_list);
                             account_list = new JSONObject();
+                            registration_account_list_additional_data = new JSONArray();
 
                             StringBuffer sbitems = new StringBuffer();
                             for (int i = 0; i < readings.size(); i++) {
@@ -488,6 +550,11 @@ public class Customer_Registration extends Activity {
                             }
                             edt_configured_accounts.setText("");
                             edt_configured_accounts.setText(sbitems.toString());
+                            spn_account_type.setEnabled(true);
+                            btnsave_details.setEnabled(true);
+                            edt_target_amount.setText("");
+                            txt_date_of_maturity.setText("");
+                            edt_account_name.setText("");
 
                             new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
                                     setTitleText("UPDATED").
@@ -503,6 +570,7 @@ public class Customer_Registration extends Activity {
             }
         });
         btnsave_details = (Button) findViewById(R.id.btnsave_details);
+        btnsave_details.setEnabled(false);
         btnsave_details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1465,6 +1533,7 @@ public class Customer_Registration extends Activity {
                 object1.put("PhysicalAddress",edt_physical_location.getText().toString());
                 object1.put("AgencyRegistrationClientAccount",registration_account_list);
 
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1502,7 +1571,8 @@ public class Customer_Registration extends Activity {
                     //JSONObject JsonResultVeriy = new JSONObject(JsonResult);
                     data_back_registartion = true;
 
-                } else {
+                }
+                else {
                     data_back_registartion = false;
                     System.out.println("*****> " + conn.getErrorStream().toString());
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
@@ -1546,6 +1616,7 @@ public class Customer_Registration extends Activity {
             if (data_back_registartion){
                 edt_target_amount.setText("");
                 txt_date_of_maturity.setText("");
+                edt_account_name.setText("");
                 selected_account_id = null;
                 selected_account_name = null;
                 selected_timeschdule_id = null;
@@ -1559,7 +1630,10 @@ public class Customer_Registration extends Activity {
                 selected_document_type_id = null;
                 phonecountry_selected = null;
                 registration_account_list = new JSONArray();
+                registration_account_list_additional_data = new JSONArray();
                 readings.clear();
+                readings2_added_info.clear();
+                readings_added_info.clear();
                 edt_configured_accounts.setText("");
 
                 Message msg1 = mhandler.obtainMessage();
@@ -1568,8 +1642,241 @@ public class Customer_Registration extends Activity {
                 msg1.setData(bundle1);
                 msg1.what = 4;
                 mhandler.sendMessage(msg1);
-            }else {
+            }
+            else {
                 return;
+            }
+        }
+    }
+
+    private class onItemChangeCallBack extends AsyncTask<Void, Void, Void>{
+        ProgressDialog pDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(Customer_Registration.this);
+            pDialog.setMessage("Loading Details...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String serviceurl = GlobalVariables.surl +"/Agency/ClientRegistration/AgencyClientRegistration/GetAdditionalDataModelsForAccount/" + selected_account_id;
+
+            URL url = null;
+            try {
+                url = new URL(serviceurl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestMethod("GET");
+                //conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", GlobalVariables.session_token);
+                conn.setDoInput(true);
+                conn.setDoOutput(false);
+
+                conn.connect();
+
+                //display what returns the GET request
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = conn.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResultVeriy = new JSONObject(JsonResult);
+                    JSONArray added_list = JsonResultVeriy.getJSONArray("Result");
+                    int tr = added_list.length();
+                    if (tr >= 1) {
+                        for (int i = 0; i < added_list.length(); i++) {
+                            JSONObject verifyresult2 = added_list.getJSONObject(i);
+
+                            KeyName = verifyresult2.getString("KeyName");
+                            AssetTypeDetailsId_val = verifyresult2.getString("AssetTypeDetailsId");
+
+                            list_added_info.add(KeyName);
+                            list2_added_info.add(AssetTypeDetailsId_val);
+                            data_back_added_info = true;
+                        }
+                    }else{
+                        //Throw Error. No Record Found
+                        data_back_added_info = false;
+                        Message msg = mhandler.obtainMessage();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("MSG_KEY", "Continue.");
+                        msg.setData(bundle);
+                        msg.what = 2;
+                        mhandler.sendMessage(msg);
+                    }
+
+                }
+                else {
+                    System.out.println("*****> " + conn.getErrorStream().toString());
+                    BufferedReader br1 = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    String line1 = null;
+                    while ((line1 = br1.readLine()) != null) {
+                        sb.append(line1 + "\n");
+                    }
+                    br1.close();
+                    System.out.println("ATEYA" + sb.toString());
+                    String JsonResult = sb.toString();
+                    JSONObject JsonResulterror = new JSONObject(JsonResult);
+                    //JSONObject error_object = JsonResulterror.getJSONObject("Result");
+                    String response_errormessage = JsonResulterror.getString("Message");
+                    System.out.println("Message >>>>>>" + response_errormessage);
+                    Message msg1 = mhandler.obtainMessage();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("MSG_KEY", response_errormessage);
+                    msg1.setData(bundle1);
+                    msg1.what = 5;
+                    mhandler.sendMessage(msg1);
+                    data_back_added_info = false;
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                e.printStackTrace();
+                data_back_added_info = false;
+                Message msg1 = mhandler.obtainMessage();
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("MSG_KEY", "JSON Exception: " + e.getMessage());
+                msg1.setData(bundle1);
+                msg1.what = 5;
+                mhandler.sendMessage(msg1);
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void file_url) {
+            if(data_back_added_info){
+                if(pDialog.isShowing()){
+                    pDialog.dismiss();
+                }
+                final Dialog dialog = new Dialog(Customer_Registration.this);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.row_spinner);
+                dialog.setCancelable(true);
+
+                // set the custom dialog components - text, image and button
+                title_add_info = list_added_info.toArray(new String[list_added_info.size()]);
+                title_add_info2 = list2_added_info.toArray(new String[list2_added_info.size()]);
+                adapter_add_info = new SpinnerAdapter(getApplicationContext());
+                final Spinner spinner = (Spinner) dialog.findViewById(R.id.spinner1);
+                final EditText edittext = (EditText) dialog.findViewById(R.id.editText1);
+                final EditText edt_added_details = (EditText) dialog.findViewById(R.id.edt_added_details);
+                Button button = (Button) dialog.findViewById(R.id.button1);
+                Button button2 = (Button) dialog.findViewById(R.id.button2);
+                spinner.setAdapter(adapter_add_info);
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        // TODO Auto-generated method stub
+                        spinner_item_add_item = title_add_info[position];
+                        AssetTypeDetailsId = title_add_info2[position];
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
+
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        //dialog.dismiss();
+                        //Toast.makeText(getApplicationContext(), spinner_item_add_item + " - " + edittext.getText().toString().trim(), Toast.LENGTH_LONG).show();
+                        if (readings_added_info.isEmpty()) {
+                            readings_added_info.add(spinner_item_add_item);
+                            readings2_added_info.add(edittext.getText().toString());
+                            try {
+                                account_list_additional_list.put("AccountID",selected_account_id);
+                                account_list_additional_list.put("KeyName",spinner_item_add_item);
+                                account_list_additional_list.put("KeyValue",edittext.getText().toString());
+                                account_list_additional_list.put("IsRequired","false");
+                                account_list_additional_list.put("AssetTypeDetailsId",AssetTypeDetailsId);
+                                registration_account_list_additional_data.put(account_list_additional_list);
+                                account_list_additional_list=new JSONObject();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+
+                            StringBuffer sbitems = new StringBuffer();
+                            for (int i = 0; i < readings_added_info.size(); i++) {
+                                sbitems.append((i + 1) + ": " + readings_added_info.get(i) + " | " + readings2_added_info.get(i) + "\n");
+                            }
+                            edt_added_details.setText("");
+                            edt_added_details.setText(sbitems.toString());
+                            edittext.setText("");
+                            return;
+                        } else if (readings_added_info.contains(spinner_item_add_item)) {
+                            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                                    setTitleText("Duplicate").
+                                    setContentText(spinner_item_add_item + " Has Already Added.").show();
+                            return;
+                        } else {
+                            readings_added_info.add(spinner_item_add_item);
+                            readings2_added_info.add(edittext.getText().toString());
+                            try {
+                                account_list_additional_list.put("AccountID",selected_account_id);
+                                account_list_additional_list.put("KeyName",spinner_item_add_item);
+                                account_list_additional_list.put("KeyValue",edittext.getText().toString());
+                                account_list_additional_list.put("IsRequired","false");
+                                account_list_additional_list.put("AssetTypeDetailsId",AssetTypeDetailsId);
+                                registration_account_list_additional_data.put(account_list_additional_list);
+                                account_list_additional_list=new JSONObject();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            StringBuffer sbitems = new StringBuffer();
+                            for (int i = 0; i < readings_added_info.size(); i++) {
+                                sbitems.append((i + 1) + ": " + readings_added_info.get(i) + " | " + readings2_added_info.get(i) + "\n");
+                            }
+                            edt_added_details.setText("");
+                            edt_added_details.setText(sbitems.toString());
+                            edittext.setText("");
+                            return;
+                        }
+                    }
+                });
+                button2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(adapter_add_info.getCount() != readings_added_info.size()){
+                            new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.WARNING_TYPE).
+                                    setTitleText("NOTE").
+                                    setContentText("Please Provide information for all needed information.").show();
+                        }else {
+                            list_added_info.clear();
+                            list2_added_info.clear();
+                            readings_added_info.clear();
+                            readings2_added_info.clear();
+                            edt_added_details.setText("");
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                dialog.show();
+            }else{
+                if(pDialog.isShowing()){
+                    pDialog.dismiss();
+                }
             }
         }
     }
@@ -1591,7 +1898,15 @@ public class Customer_Registration extends Activity {
                 case 2:
                     Bundle bundle2 = msg.getData();
                     String string2 = bundle2.getString("MSG_KEY");
-                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).setTitleText("SORRY").setContentText(string2).show();
+                    new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).setTitleText("").
+                            setContentText(string2).
+                            setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                sDialog.dismissWithAnimation();
+                                spn_account_type.setEnabled(true);
+                            }
+                            }).show();
 
                     break;
                 case 3:
@@ -1699,5 +2014,53 @@ public class Customer_Registration extends Activity {
             // not connected to the internet
             return false;
         }
+    }
+
+    public class SpinnerAdapter extends BaseAdapter {
+        Context context;
+        private LayoutInflater mInflater;
+
+        public SpinnerAdapter(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public int getCount() {
+            return title_add_info.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return position;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final ListContent holder;
+            View v = convertView;
+            if (v == null) {
+                mInflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+                v = mInflater.inflate(R.layout.row_textview, null);
+                holder = new ListContent();
+                holder.text = (TextView) v.findViewById(R.id.textView1);
+
+                v.setTag(holder);
+            } else {
+                holder = (ListContent) v.getTag();
+            }
+
+            holder.text.setText(title_add_info[position]);
+
+            return v;
+        }
+    }
+
+    static class ListContent {
+        TextView text;
     }
 }

@@ -11,7 +11,7 @@
     <string name="txt_gender_types">Select Gender:<font color='#FF0000'>*</font></string>
 
 
-    <string name="txt_select_account">Select Account:<font color='#FF0000'>*</font></string>
+    <string name="txt_select_account">Select Product:<font color='#FF0000'>*</font></string>
     <string name="txt_lock_mode">Select Schedule:<font color='#FF0000'>*</font></string>
     <string name="txt_target">Target Amount:<font color='#FF0000'>*</font></string>
     <string name="txt_maturity_date">Maturity Date:<font color='#FF0000'>*</font></string>

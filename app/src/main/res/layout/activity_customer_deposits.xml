@@ -27,22 +27,14 @@
         android:layout_marginRight="5dp"
         android:gravity="right">
 
-        <Switch
-            android:id="@+id/printerswitch"
+        <TextView
+            android:id="@+id/txtfloat"
             android:layout_width="150dp"
-            android:layout_height="40dp"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
-            android:onClick="togglestatehandler"
             android:switchPadding="20dp"
-            android:text="Printer"
             android:textColor="@color/black"
-            android:textOff="Off"
-            android:textOn="On"
-            android:textSize="18dp"
-            android:thumb="@drawable/switch_selector"
-            android:thumbTextPadding="10dp"
-            android:track="@drawable/customtrack"
-            android:visibility="gone"/>
+            android:textSize="18dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -152,20 +144,6 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20dp"></Button>
-
-
-        <Button
-            android:id="@+id/btnprintreceipt"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/btn_bg_design"
-            android:text="Print"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="20dp"
-            android:visibility="gone"></Button>
     </LinearLayout>
 
 </RelativeLayout>

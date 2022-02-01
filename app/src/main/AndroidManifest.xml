@@ -29,27 +29,30 @@
         android:theme="@style/Theme.AppCompat.Light">
         <activity
             android:name=".ForgetPassword"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat"/>
         <activity
             android:name=".CustomerAccountBalance"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat"/>
         <activity
             android:name=".APK_Update"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat"/>
         <activity
             android:name=".Customer_account_configuration"
-            android:exported="true" />
+            android:exported="true"/>
         <activity
             android:name=".Customer_Registration"
-            android:exported="true" />
+            android:exported="true"/>
         <activity
             android:name=".CustomerDeposits"
-            android:exported="true" />
+            android:exported="true"/>
         <activity
             android:name=".LoginActivity"
             android:alwaysRetainTaskState="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -59,7 +62,8 @@
         <activity
             android:name=".MainActivity"
             android:label="DashBoard"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat"/>
         <activity
             android:name=".EditPreferences"
             android:label="PimApp Settings"

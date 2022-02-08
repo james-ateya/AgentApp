@@ -269,8 +269,9 @@ public class ForgetPassword extends Activity {
         protected Void doInBackground(Void... params) {
             //Get data and store in List
             String serviceurl = GlobalVariables.surl + "/SystemAccounts/Authentication/UserProfile/ForgotPasswordSimple";
-            JSONObject object1;
+            JSONObject object1,object2;
             object1 = new JSONObject();
+            object2 = new JSONObject();
             URL url = null;
             try {
                 url = new URL(serviceurl);
@@ -285,11 +286,12 @@ public class ForgetPassword extends Activity {
                 mhandler.sendMessage(msg1);
             }
             try {
-                object1.put("UserName", GlobalVariables.touseusername);
-                object1.put("PassWord", "");
-                object1.put("AccountName","");
-                object1.put("Branch","");
-                object1.put("ShowCommandButtons", "true");
+                object2.put("UserName", GlobalVariables.touseusername);
+                object2.put("PassWord", "");
+                object2.put("AccountName","");
+                object2.put("Branch","");
+                object2.put("ShowCommandButtons", "true");
+                object1.put("CurrentUser",object2);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -466,7 +468,8 @@ public class ForgetPassword extends Activity {
                     msg1.what=6;
                     mhandler.sendMessage(msg1);
 
-                } else {
+                }
+                else {
                     if (pDialog.isShowing()) {
                         pDialog.dismiss();
                     }

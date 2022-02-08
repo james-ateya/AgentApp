@@ -143,6 +143,7 @@ public class CustomerDeposits extends Activity {
                         collected_data.put("amount", edt_amount.getText().toString());
                         allocations.put(collected_data);
                         collected_data = new JSONObject();
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -170,6 +171,8 @@ public class CustomerDeposits extends Activity {
                     edadditems.setText(sbitems.toString() + "\n" + sbitems2.toString());
 
                     edt_amount.setText("");
+                    selected_account_no = null;
+                    selected_account_name = null;
                 }
             }
         });
@@ -340,7 +343,7 @@ public class CustomerDeposits extends Activity {
                             //result = verifyresult3.getJSONObject(i).toString(i);
                             JSONObject verifyresult2 = accountlists.getJSONObject(i);
 
-                            account_name = verifyresult2.getString("account_name");
+                            account_name = verifyresult2.getString("true_account_name");
                             account_no = verifyresult2.getString("account_no");
 
                             data_back = true;

@@ -29,16 +29,13 @@
         android:theme="@style/Theme.AppCompat.Light">
         <activity
             android:name=".ForgetPassword"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat"/>
+            android:exported="false"/>
         <activity
             android:name=".CustomerAccountBalance"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat"/>
+            android:exported="false"/>
         <activity
             android:name=".APK_Update"
-            android:exported="true"
-            android:theme="@style/Theme.AppCompat"/>
+            android:exported="true"/>
         <activity
             android:name=".Customer_account_configuration"
             android:exported="true"/>

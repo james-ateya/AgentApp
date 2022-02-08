@@ -479,6 +479,10 @@ public class Customer_Registration extends Activity {
                 if(spn_account_type == null || spn_account_type.getSelectedItem() == null){
                     Toast.makeText(Customer_Registration.this, "Select Client Account.", Toast.LENGTH_LONG).show();
                 }
+                else if(edt_account_name.getText().toString().isEmpty()){
+                    Toast.makeText(Customer_Registration.this, "Supply Account Name.", Toast.LENGTH_LONG).show();
+                    edt_account_name.requestFocus();
+                }
                 else if(spn_lock_mode == null || spn_lock_mode.getSelectedItem() == null){
                     Toast.makeText(Customer_Registration.this, "Select Client Time Schedule.", Toast.LENGTH_LONG).show();
                 }
@@ -522,13 +526,15 @@ public class Customer_Registration extends Activity {
                             new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.SUCCESS_TYPE).
                                     setTitleText("UPDATED").
                                     setContentText("Account Details updated successfully.").show();
-                        } else if (readings.contains(selected_account_name)) {
+                        }
+                        /*else if (readings.contains(selected_account_name)) {
                             new SweetAlertDialog(Customer_Registration.this, SweetAlertDialog.ERROR_TYPE).
                                     setTitleText("Duplicate Account").
                                     setContentText(selected_account_name + " Has Already Been Configured.").show();
                             spn_account_type.setEnabled(true);
                             return;
-                        } else {
+                        } */
+                        else {
                             readings.add(selected_account_name);
                             account_list.put("AccountTypeId", selected_account_id);
                             account_list.put("AccountTypeName", selected_account_name);
@@ -576,6 +582,7 @@ public class Customer_Registration extends Activity {
             public void onClick(View v) {
                 //Save all the details provided
                 if(getnetwork_state()){
+                    btnsave_details.setEnabled(false);
                     SaveCustomerDetails savedetails = new SaveCustomerDetails();
                     savedetails.execute();
                 }else{
@@ -1635,6 +1642,7 @@ public class Customer_Registration extends Activity {
                 readings2_added_info.clear();
                 readings_added_info.clear();
                 edt_configured_accounts.setText("");
+                btnsave_details.setEnabled(true);
 
                 Message msg1 = mhandler.obtainMessage();
                 Bundle bundle1 = new Bundle();
@@ -1765,7 +1773,7 @@ public class Customer_Registration extends Activity {
                 final Dialog dialog = new Dialog(Customer_Registration.this);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.row_spinner);
-                dialog.setCancelable(true);
+                dialog.setCancelable(false);
 
                 // set the custom dialog components - text, image and button
                 title_add_info = list_added_info.toArray(new String[list_added_info.size()]);

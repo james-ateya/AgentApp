@@ -41,6 +41,7 @@ import java.io.InputStream;
 public class APK_Update extends AppCompatActivity {
     Button btnUpdate;
     TextView textView2;
+    boolean success = false;
     // Progress Dialog
     private ProgressDialog pDialog;
 
@@ -80,7 +81,7 @@ public class APK_Update extends AppCompatActivity {
                 // If you have access to the external storage, do whatever you need
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if (Environment.isExternalStorageManager()){
-                        File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
+                        File file = new File(Environment.getExternalStorageDirectory() + "/lipasasa.apk");
                         file.delete();
                         new DownloadFilesTask().execute();
                     }
@@ -233,10 +234,10 @@ public class APK_Update extends AppCompatActivity {
             // TODO Auto-generated method stub
             JSch jsch = new JSch();
             try {
-                File file = new File(Environment.getExternalStorageDirectory() + "/Intro-release.apk");
+                File file = new File(Environment.getExternalStorageDirectory() + "/lipasasa.apk");
                 file.delete();
                 String ip = GlobalVariables.apk_download_link;
-                Session session = jsch.getSession("lipasasa", ip, 1989);
+                Session session = jsch.getSession("lipasasa_app", ip, 1989);
                 session.setTimeout(30000000);
                 java.util.Properties config = new java.util.Properties();
                 config.put("StrictHostKeyChecking", "no");
@@ -268,15 +269,20 @@ public class APK_Update extends AppCompatActivity {
                     out.write(buffer, 0, len);
                 }
                 //Toast.makeText(APK_Update.this,"Finished Downloading",Toast.LENGTH_LONG).show();
+                success = true;
                 sftpChannel.exit();
                 session.disconnect();
             } catch (JSchException e) {
+                success = false;
                 e.printStackTrace();
             } catch (SftpException e) {
+                success = false;
                 e.printStackTrace();
             } catch (FileNotFoundException e) {
+                success = false;
                 e.printStackTrace();
             } catch (IOException e) {
+                success = false;
                 e.printStackTrace();
             }
 
@@ -291,7 +297,12 @@ public class APK_Update extends AppCompatActivity {
         protected void onPostExecute(String result) {
             // dismiss the dialog after the file was downloaded
             dismissDialog(progress_bar_type);
-            installAPK(btnUpdate);
+            if(success){
+                installAPK(btnUpdate);
+            }else{
+                return;
+            }
+
         }
 
     }

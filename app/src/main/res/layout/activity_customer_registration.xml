@@ -13,7 +13,7 @@
         android:id="@+id/wrapping_panel1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <LinearLayout
             android:id="@+id/relative_back"
@@ -293,7 +293,7 @@
         android:id="@+id/wrapping_panel2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
         <LinearLayout
             android:id="@+id/relative_back1"
             android:layout_width="match_parent"
@@ -330,8 +330,8 @@
                 android:id="@+id/inner_nav1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <TextView
@@ -339,19 +339,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:textStyle="bold"
+                    android:text="@string/txt_select_account"
                     android:textSize="20dp"
-                    android:text="@string/txt_select_account"></TextView>
+                    android:textStyle="bold"></TextView>
 
-                <Spinner
+                <com.paltouch.agentapp.NDSpinner
                     android:id="@+id/spn_account_type"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginLeft="10dp"
-                    android:textStyle="bold"
-                    android:textSize="20dp">
+                    android:textSize="20dp"
+                    android:textStyle="bold">
 
-                </Spinner>
+                </com.paltouch.agentapp.NDSpinner>
             </LinearLayout>
 
             <LinearLayout
@@ -369,7 +369,7 @@
                     android:layout_marginLeft="10dp"
                     android:textStyle="bold"
                     android:textSize="20dp"
-                    android:text="Account Name"></TextView>
+                    android:text="@string/txt_accuntname"></TextView>
 
                 <EditText
                     android:id="@+id/edt_account_name"
@@ -377,8 +377,7 @@
                     android:layout_height="50dp"
                     android:layout_marginLeft="10dp"
                     android:textStyle="bold"
-                    android:textSize="20dp"
-                    android:hint="Optional"></EditText>
+                    android:textSize="20dp"></EditText>
             </LinearLayout>
 
             <LinearLayout
@@ -398,13 +397,15 @@
                     android:textSize="20dp"
                     android:text="@string/txt_lock_mode"></TextView>
 
-                <Spinner
+                <com.paltouch.agentapp.NDSpinner
                     android:id="@+id/spn_lock_mode"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginLeft="10dp"
                     android:textStyle="bold"
-                    android:textSize="20dp"></Spinner>
+                    android:textSize="20dp">
+
+                </com.paltouch.agentapp.NDSpinner>
             </LinearLayout>
 
             <LinearLayout

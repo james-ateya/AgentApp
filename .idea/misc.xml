@@ -21,6 +21,7 @@
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/drawable/gradient.xml" value="0.11354166666666667" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/drawable/switch_selector.xml" value="0.11354166666666667" />
+        <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_agent_daily_report.xml" value="0.2033514492753623" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_apk_update.xml" value="0.1" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_customer_account_balance.xml" value="0.19791666666666666" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_customer_deposits.xml" value="0.1" />
@@ -28,9 +29,11 @@
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_forget_password.xml" value="0.12" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_login.xml" value="0.1" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/activity_main.xml" value="0.10005065856129686" />
+        <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/agent_report_itemlist.xml" value="0.2033514492753623" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/customer_account_configuration.xml" value="0.16893115942028986" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/footer_layout.xml" value="0.10005065856129686" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/fragment_layout.xml" value="0.1" />
+        <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/list_item.xml" value="0.20572916666666666" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/listview_adapter.xml" value="0.13994565217391305" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/row_spinner.xml" value="0.15534420289855072" />
         <entry key="..\:/Android projects/AgentApp/app/src/main/res/layout/row_textview.xml" value="0.15534420289855072" />

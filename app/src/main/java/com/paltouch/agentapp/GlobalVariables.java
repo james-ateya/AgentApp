@@ -6,7 +6,7 @@ public class GlobalVariables {
     public static String touseusername;
     public static String surl = "https://agentapp.lipasasa.africa";
     //public static String surl = "https://014f-154-122-43-56.ngrok.io";
-    public static String apk_download_link = "102.133.191.227";
+    public static String apk_download_link = "20.87.20.230";
     public static String session_token;
     public static String apk_version,apk_name,server_path;
 

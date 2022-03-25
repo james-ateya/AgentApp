@@ -2,8 +2,11 @@ package com.paltouch.agentapp;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -15,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,20 +44,36 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
     EditText edt_clientid;
     Button btn_generate_id;
     Spinner spn_clientaccounts;
-    TextView txt_balance,txt_targetamount,txt_maturitydate,txt_clientname_id;
+    TextView txt_total_moneyin,txt_clientname_id,txt_total_moneyout,txt_balance;
+    DatabaseHelper dbhelper;
+    SQLiteDatabase db;
 
     ArrayList<String> list = new ArrayList<String>();
     ArrayList<String> list1 = new ArrayList<String>();
+    ArrayList<String> totalmoneyin = new ArrayList<String>();
+    ArrayList<String> totalmoneyout = new ArrayList<String>();
+    ArrayList<String> other_refs = new ArrayList<String>();
     boolean data_back = false;
     String title[];
-    private String client_name,phone_no,member_no;
-    private String account_name,account_no;
-    String selected_account_name,selected_account_no,selected_balance;
+    private String client_name,member_no;
+    String selected_account_name,selected_balance,selected_other_ref;
+    private ArrayList<member_profile_model> member_profile_models_arraylist;
+    private ListView listView_items;
+    private ArrayList<String> ref_no = new ArrayList<>();
+    private ArrayList<String> amount_in = new ArrayList<>();
+    private ArrayList<String> amount_out = new ArrayList<>();
+    private ArrayList<String> appr_date = new ArrayList<>();
+    private ArrayList<String> bal = new ArrayList<>();
+    private ArrayList<String> r_no = new ArrayList<>();
+    private ArrayList<member_profile_model> member_profile_model_ArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_account_balance);
+
+        dbhelper = new DatabaseHelper(getApplicationContext());
+        db = dbhelper.getWritableDatabase();
 
         edt_clientid = (EditText) findViewById(R.id.edt_clientid);
         btn_generate_id = (Button) findViewById(R.id.btn_generate_id);
@@ -63,6 +83,9 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
                 //Call async task to load client details
                 list.clear();
                 list1.clear();
+                totalmoneyin.clear();
+                totalmoneyout.clear();
+                other_refs.clear();
                 title = new String[0];
                 boolean network_state = getnetwork_state();
                 if(network_state){
@@ -80,11 +103,12 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
             }
         });
         txt_clientname_id = (TextView) findViewById(R.id.txt_clientname_id);
+        txt_total_moneyin = (TextView) findViewById(R.id.txt_total_moneyin);
+        txt_total_moneyout = (TextView) findViewById(R.id.txt_total_moneyout);
+        txt_balance = (TextView) findViewById(R.id.txt_balance);
+        listView_items = (ListView) findViewById(R.id.listView_items);
         spn_clientaccounts = (Spinner) findViewById(R.id.spn_clientaccounts);
         spn_clientaccounts.setOnItemSelectedListener(this);
-        txt_balance = (TextView) findViewById(R.id.txt_balance);
-        txt_targetamount = (TextView) findViewById(R.id.txt_targetamount);
-        txt_maturitydate = (TextView) findViewById(R.id.txt_maturitydate);
     }
 
     @Override
@@ -127,9 +151,21 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
                                View view, int pos, long id) {
         //Call asynctask from here to laod account Balance
         try {
+            txt_balance.setText("");
+            txt_total_moneyin.setText("");
+            txt_total_moneyout.setText("");
             selected_account_name = (String) title[pos];
             selected_balance = list1.get(pos);
-            txt_balance.setText(selected_balance);
+            selected_other_ref = other_refs.get(pos);
+            txt_balance.setText("Bal: "+selected_balance);
+            txt_total_moneyin.setText("In: "+totalmoneyin.get(pos));
+            txt_total_moneyout.setText("Out: "+totalmoneyout.get(pos));
+
+            member_profile_model_ArrayList = populateList();
+
+            member_profile_adapter foodAdapter = new member_profile_adapter(this,member_profile_model_ArrayList);
+            listView_items.setAdapter(foodAdapter);
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -137,6 +173,42 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
 
     public void onNothingSelected(AdapterView parent) {
         // Do nothing.
+    }
+
+    private ArrayList<member_profile_model> populateList(){
+
+        ArrayList<member_profile_model> list = new ArrayList<>();
+
+        String[] columns = {DatabaseHelper.OTHER_REF, DatabaseHelper.AMOUNT_IN,DatabaseHelper.AMOUNT_OUT,DatabaseHelper.APPROVAL_DATE, DatabaseHelper.BALANCE,DatabaseHelper.RECEIPT_NO};
+        Cursor cursor = db.query(DatabaseHelper.TRANSACTION_TABLE_NAME, columns,
+                    DatabaseHelper.OTHER_REF + "= '" + selected_other_ref +"'", null, null,
+                    null, null);
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                member_profile_model profile_model = new member_profile_model();
+
+                int index2 = cursor.getColumnIndex(DatabaseHelper.AMOUNT_IN);
+                profile_model.setMoney_in(cursor.getString(index2));
+
+                int index3 = cursor.getColumnIndex(DatabaseHelper.AMOUNT_OUT);
+                profile_model.setMoney_out(cursor.getString(index3));
+
+                int index4 = cursor.getColumnIndex(DatabaseHelper.APPROVAL_DATE);
+                profile_model.setV_date(cursor.getString(index4));
+
+                int index5 = cursor.getColumnIndex(DatabaseHelper.BALANCE);
+                profile_model.setBalance(cursor.getString(index5));
+
+                int index6 = cursor.getColumnIndex(DatabaseHelper.RECEIPT_NO);
+                profile_model.setReceipt_number(cursor.getString(index6));
+
+                list.add(profile_model);
+            }
+        } else {
+            //Nothing
+        }
+
+        return list;
     }
 
     Boolean getnetwork_state(){
@@ -173,7 +245,7 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
 
         @Override
         protected Void doInBackground(Void... params) {
-            String serviceurl = GlobalVariables.surl +"/Employees/OfficerMembers/GetOfficerMemberAccounts";
+            String serviceurl = GlobalVariables.surl +"/MemberProfile/MemberProfile/GetMemberDetail";
             JSONObject object1,object2,object3;
             JSONArray s;
             s = new JSONArray();
@@ -188,16 +260,9 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
             }
 
             try {
-                object1.put("take", "1");
-                object1.put("skip", "0");
-                object2.put("logic", "and");
-                object3.put("value", edt_clientid.getText().toString());
-                object3.put("field", "member_no");
-                object3.put("operator", "equals");
-                object3.put("ignoreCase", "true");
-                s.put(object3);
-                object2.put("filters", s);
-                object1.put("filter", object2);
+                object1.put("FilterValue", edt_clientid.getText().toString());
+                object1.put("BiometricsValidated", "false");
+                object1.put("TryValidateBiomExpected", "true");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -234,28 +299,60 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
                     String JsonResult = sb.toString();
                     JSONObject JsonResultVeriy = new JSONObject(JsonResult);
                     JSONObject jresponse = JsonResultVeriy.getJSONObject("Result");
-                    JSONArray memberslists = jresponse.getJSONArray("Members");
-                    int tr = memberslists.length();
-                    if (tr >= 1) {
-                        for (int i = 0; i < memberslists.length(); i++) {
-                            data_back = true;
-                            //result = verifyresult3.getJSONObject(i).toString(i);
-                            JSONObject verifyresult2 = memberslists.getJSONObject(i);
-                            JSONObject member_details = verifyresult2.getJSONObject("MemberDetails");
+                    JSONObject memberdetails = jresponse.getJSONObject("MemberDetails");
 
-                            client_name = member_details.getString("full_name");
-                            member_no = member_details.getString("member_no");
+                    client_name = memberdetails.getString("full_name");
+                    member_no = memberdetails.getString("member_no");
+                    db.delete(DatabaseHelper.TRANSACTION_TABLE_NAME,null,null);
 
-                            JSONArray accounts_list = verifyresult2.getJSONArray("MemberAccounts");
-                            int tr1 = accounts_list.length();
-                                for (int j = 0; j < accounts_list.length(); j++) {
-                                    JSONObject verifyresult3 = accounts_list.getJSONObject(j);
-                                    JSONObject accounts = verifyresult3.getJSONObject("MemberAccount");
-                                    JSONObject sacco_accounts = accounts.getJSONObject("sacco_accounts");
-                                    list.add(sacco_accounts.getString("name"));
-                                    list1.add(accounts.getString("Balance"));
+                    JSONArray accounts_list = memberdetails.getJSONArray("member_accounts");
+                    int tr1 = accounts_list.length();
+                    String other_ref;
+                    if(tr1 >0) {
+                        for (int j = 0; j < accounts_list.length(); j++) {
+                            JSONObject accounts = accounts_list.getJSONObject(j);
+
+                            //JSONObject accounts = verifyresult3.getJSONObject("MemberAccount");
+                            //JSONObject sacco_accounts = accounts.getJSONObject("sacco_accounts");
+                            list.add(accounts.getString("AccountName"));
+                            list1.add(accounts.getString("CurrentBalance"));
+                            totalmoneyin.add(accounts.getString("TotalAmountIn"));
+                            totalmoneyout.add(accounts.getString("TotalAmountOut"));
+                            other_refs.add(accounts.getString("AccountRefNo"));
+                            other_ref = "";
+                            other_ref = accounts.getString("AccountRefNo");
+
+                            JSONArray AccountTransactions = accounts.getJSONArray("AccountTransactions");
+                            int tr2 = AccountTransactions.length();
+                            if(tr2 >0) {
+                                for (int k = 0; k < AccountTransactions.length(); k++) {
+                                    JSONObject verifyresult4 = AccountTransactions.getJSONObject(k);
+                                    ContentValues cv = new ContentValues();
+                                    cv.put(DatabaseHelper.OTHER_REF, other_ref);
+                                    cv.put(DatabaseHelper.AMOUNT_IN, verifyresult4.getString("AmountIn"));
+                                    cv.put(DatabaseHelper.AMOUNT_OUT,verifyresult4.getString("AmountOut"));
+                                    cv.put(DatabaseHelper.APPROVAL_DATE,verifyresult4.getString("ApprovalDate"));
+                                    cv.put(DatabaseHelper.BALANCE,verifyresult4.getString("Balance"));
+                                    cv.put(DatabaseHelper.RECEIPT_NO,verifyresult4.getString("ReceiptNumber"));
+                                    db.insert(DatabaseHelper.TRANSACTION_TABLE_NAME, null, cv);
                                 }
+                            }
+                            else{
+                                //Nothing
+                            }
                         }
+                    }
+                    else{
+                        if(pDialog.isShowing()){
+                            pDialog.dismiss();
+                        }
+                        Message msg1 = mhandler.obtainMessage();
+                        Bundle bundle1 = new Bundle();
+                        bundle1.putString("MSG_KEY", "No result from the server");
+                        msg1.setData(bundle1);
+                        msg1.what = 5;
+                        mhandler.sendMessage(msg1);
+                    }
 
                         //Read the list
                         if (list.size() <= 0) {
@@ -266,7 +363,7 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
                             data_back = false;
                             Message msg = mhandler.obtainMessage();
                             Bundle bundle = new Bundle();
-                            bundle.putString("MSG_KEY", "No data returned from the server while fetching stations. Please consult system admin.");
+                            bundle.putString("MSG_KEY", "No data returned from the server. Please consult system admin.");
                             msg.setData(bundle);
                             msg.what = 2;
                             mhandler.sendMessage(msg);
@@ -275,19 +372,6 @@ public class CustomerAccountBalance extends Activity implements AdapterView.OnIt
                             title = list.toArray(new String[list.size()]);
                             data_back = true;
                         }
-                    }else{
-                        //Throw Error. No Record Found
-                        if (pDialog.isShowing()) {
-                            pDialog.dismiss();
-                        }
-                        data_back = false;
-                        Message msg = mhandler.obtainMessage();
-                        Bundle bundle = new Bundle();
-                        bundle.putString("MSG_KEY", "No records returned from server. Please input correct customer identification.");
-                        msg.setData(bundle);
-                        msg.what = 2;
-                        mhandler.sendMessage(msg);
-                    }
 
                 }
                 else {

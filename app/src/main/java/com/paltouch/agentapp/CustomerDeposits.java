@@ -2,9 +2,11 @@ package com.paltouch.agentapp;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,7 +38,9 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -50,7 +55,9 @@ public class CustomerDeposits extends Activity {
     private String account_name,account_no;
     String selected_account_name,selected_account_no;
     JSONArray allocations;
+    JSONArray datatosave;
     JSONObject collected_data;
+    JSONObject collected_data_tosave;
     ArrayList<String> total_amount = new ArrayList<String>();
     StringBuffer sbitems = new StringBuffer();
     Double totalC = 0.0;
@@ -62,13 +69,21 @@ public class CustomerDeposits extends Activity {
     TextView txt_clientname,txtfloat;
     Spinner spn_accounts;
     String response_message;
+
+    DatabaseHelper dbhelper;
+    SQLiteDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_deposits);
 
+        dbhelper = new DatabaseHelper(getApplicationContext());
+        db = dbhelper.getWritableDatabase();
+
         collected_data = new JSONObject();
+        collected_data_tosave = new JSONObject();
         allocations = new JSONArray();
+        datatosave = new JSONArray();
 
         edt_amount = (EditText) findViewById(R.id.edt_amount);
         edadditems = (EditText) findViewById(R.id.edadditems);
@@ -156,6 +171,22 @@ public class CustomerDeposits extends Activity {
 
                     List<String> Amount = new ArrayList<String>();
                     Amount.add(edt_amount.getText().toString());
+
+                    //to save
+                    try {
+                        collected_data_tosave.put("account_no",selected_account_no);
+                        collected_data_tosave.put("amount",edt_amount.getText().toString());
+                        collected_data_tosave.put("account_name",selected_account_name);
+                        collected_data_tosave.put("full_name",txt_clientname.getText().toString());
+                        collected_data_tosave.put("nat_id",edt_searchclient.getText().toString());
+                        collected_data_tosave.put("collection_date",getday());
+                        collected_data_tosave.put("collected_time",gettime());
+                        datatosave.put(collected_data_tosave);
+                        collected_data_tosave = new JSONObject();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
 
                     StringBuffer sbitems2 = new StringBuffer();
 
@@ -574,6 +605,29 @@ public class CustomerDeposits extends Activity {
             txt_clientname.setText("");
 
             if(data_back){
+                //Save collection to sql-lite
+                try {
+                int tr1 = datatosave.length();
+                if(tr1 >0) {
+                    for (int j = 0; j < datatosave.length(); j++) {
+                        JSONObject accounts = datatosave.getJSONObject(j);
+                        ContentValues cv = new ContentValues();
+                        cv.put(DatabaseHelper.FULL_NAME, accounts.getString("full_name"));
+                        cv.put(DatabaseHelper.NAT_ID, accounts.getString("nat_id"));
+                        cv.put(DatabaseHelper.ACCOUNT_NUMBER,accounts.getString("account_no"));
+                        cv.put(DatabaseHelper.ACCOUNT_NAME,accounts.getString("account_name"));
+                        cv.put(DatabaseHelper.DEPOSITED_AMOUNT,accounts.getString("amount"));
+                        cv.put(DatabaseHelper.DATE,accounts.getString("collection_date"));
+                        cv.put(DatabaseHelper.TIME,accounts.getString("collected_time"));
+                        db.insert(DatabaseHelper.AGENT_REPORT_TABLE_NAME, null, cv);
+                    }
+                }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                datatosave = new JSONArray();
+
                 Message msg1 = mhandler.obtainMessage();
                 Bundle bundle1 = new Bundle();
                 bundle1.putString("MSG_KEY", response_message);
@@ -689,5 +743,15 @@ public class CustomerDeposits extends Activity {
 
         };
     };
+
+    String getday() {
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MMM/yy");
+        return sdf.format(now);
+    }
+
+    String gettime() {
+        return DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(), DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR);
+    }
 
 }

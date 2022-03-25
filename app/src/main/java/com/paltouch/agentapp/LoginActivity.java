@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,11 +48,20 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
     private TextView LostPassword;
     ArrayList<String> permissions=new ArrayList<>();
     PermissionUtils permissionUtils;
+    DatabaseHelper dbhelper;
+    SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        dbhelper = new DatabaseHelper(getApplicationContext());
+        db = dbhelper.getWritableDatabase();
+
+        createfield();
+
+        HttpsTrustManager.allowAllSSL();
 
         permissionUtils=new PermissionUtils(LoginActivity.this);
 
@@ -374,4 +384,8 @@ public class LoginActivity extends Activity implements PermissionUtils.Permissio
 
         };
     };
+
+    void createfield() {
+        db.execSQL(DatabaseHelper.CREATE_TABLE_AGENT_REPORT);
+    }
 }

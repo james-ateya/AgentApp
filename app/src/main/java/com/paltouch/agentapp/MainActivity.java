@@ -123,6 +123,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btn_reports = (Button) findViewById(R.id.btn_reports);
+        btn_reports.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Call Daily report activity
+                if(getnetwork_state()) {
+                    deposit = false;
+                    withdraw=false;
+                    reports=true;
+                    info=false;
+                    customer = false;
+                    check_loggedin check_session = new check_loggedin();
+                    check_session.execute();
+                }else{
+                    new SweetAlertDialog(MainActivity.this, SweetAlertDialog.ERROR_TYPE).setTitleText("NO INTERNET").setContentText("Make sure you have internet connection.").show();
+                }
+
+            }
+        });
+
     }
 
     @Override
@@ -440,6 +460,10 @@ public class MainActivity extends AppCompatActivity {
                     }else if(customer){
                         Intent iscustomer_reg = new Intent(MainActivity.this, Customer_Registration.class);
                         startActivity(iscustomer_reg);
+                        MainActivity.this.finish();
+                    } else if(reports){
+                        Intent is_reports = new Intent(MainActivity.this, AgentDailyReport.class);
+                        startActivity(is_reports);
                         MainActivity.this.finish();
                     }else{
                         Intent iscustomer_bal = new Intent(MainActivity.this, CustomerAccountBalance.class);

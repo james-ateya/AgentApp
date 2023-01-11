@@ -151,7 +151,7 @@ public class CustomerDeposits extends Activity {
                 }
                 else {
                     try {
-                        if(selected_account_name.contains("NHIF")){
+                        if(selected_account_name.contains("Collection Account")){
                             collected_data.put("IsNHIF", "True");
                         }
                         collected_data.put("account_no", selected_account_no);
@@ -414,7 +414,8 @@ public class CustomerDeposits extends Activity {
                         mhandler.sendMessage(msg);
                     }
 
-                } else {
+                }
+                else {
                     if (pDialog.isShowing()) {
                         pDialog.dismiss();
                     }

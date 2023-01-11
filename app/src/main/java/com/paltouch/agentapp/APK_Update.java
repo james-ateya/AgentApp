@@ -178,6 +178,8 @@ public class APK_Update extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(uriFromFile(getApplicationContext(), new File(PATH)), "application/vnd.android.package-archive");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE,true);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             try {
                 getApplicationContext().startActivity(intent);
